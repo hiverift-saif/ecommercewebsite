@@ -18,6 +18,7 @@ export default function Products() {
   const removeImage = (id) => {
     setImages((prev) => prev.filter((img) => img.id !== id));
   };
+  
 
   // Drag reorder
   const handleDrag = (e, index) => {

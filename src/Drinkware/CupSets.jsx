@@ -6,8 +6,9 @@ import { useEffect, useState } from "react";
 
 export default function CupSets() {
   const {
-    isFilterOpen,
+     isFilterOpen,
     setIsFilterOpen,
+    setAllProducts,
     filteredProducts,
     setFilteredProducts,
   } = useFilter();
@@ -52,9 +53,10 @@ export default function CupSets() {
   ];
 
   // Load products first time
-  useEffect(() => {
-    setFilteredProducts(products);
-  }, []);
+useEffect(() => {
+  setAllProducts(products);        // ⭐ VERY IMPORTANT
+  setFilteredProducts(products);   // ⭐ show on load
+}, []);
 
   return (
     <div className="w-full px-4 py-6 relative">

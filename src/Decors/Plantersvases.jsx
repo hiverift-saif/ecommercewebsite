@@ -5,7 +5,11 @@ import FilterHeader from "../components/Filters/FilterHeader";
 import { useState, useEffect } from "react";
 
 export default function Plantersvases() {
-  const { isFilterOpen, setIsFilterOpen, filteredProducts, setFilteredProducts } = useFilter();
+  const {      isFilterOpen,
+    setIsFilterOpen,
+    setAllProducts,
+    filteredProducts,
+    setFilteredProducts, } = useFilter();
   const { addItem } = useCart();
 
   // PLANETERS & VASES PRODUCTS
@@ -49,9 +53,11 @@ export default function Plantersvases() {
   ];
 
   // LOAD INIT PRODUCTS
-  useEffect(() => {
-    setFilteredProducts(products);
-  }, []);
+useEffect(() => {
+  setAllProducts(products);        // ⭐ VERY IMPORTANT
+  setFilteredProducts(products);   // ⭐ show on load
+}, []);
+
 
   return (
     <div className="w-full px-4 py-6 relative">

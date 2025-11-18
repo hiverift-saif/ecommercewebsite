@@ -39,7 +39,7 @@ import DipsPlate from "./Tableware/DipsPlate";
 import KitchenEssentials from "./HomeEssentials/KitchenEssentials";
 import Organizer from "./HomeEssentials/Organizer";
 
-import Sales from "./Sales/Sales";
+import Sales from "./components/Sales";
 import MugSet from "./Combo/MugSet";
 
 import Pendants from "./WomenAccessories/Pendants";
@@ -47,7 +47,7 @@ import Earrings from "./WomenAccessories/Earrings";
 import Bracelet from "./WomenAccessories/Bracelet";
 
 import Tableware from "./HeroContentLInk/Tableware";
-import Cookware from "./HeroContentLInk/Cookware";
+// import Cookware from "./HeroContentLInk/Cookware";
 import Drinkware from "./HeroContentLInk/Drinkware";
 
 import Womenaccessories from "./HeroContentLInk/Womenaccessories";
@@ -56,6 +56,15 @@ import Jars from "./HeroContentLInk/Jars";
 
 // ⭐ FILTER CONTEXT IMPORT
 import { FilterProvider } from "./context/FilterContext";
+import Signup from "./components/Signup";
+import Login from "./components/Login";
+import MyOrder from "./Profile/MyOrder";
+import UserProfile from "./Profile/UserProfile";
+import SubCategories from "./admin/pages/SubCategories";
+import Cookware from "./HomeEssentials/Cookware";
+import TravelMug from "./Combo/TravelMug";
+import Combooffers from "./HeroContentLInk/Combooffers";
+import Homeessentials from "./HeroContentLInk/Homeessentials";
 
 // ─────────────────────────────────────────────
 // Public Website Layout
@@ -114,6 +123,7 @@ export default function App() {
           <Route path="/Organizer" element={<Organizer />} />
           <Route path="/Sales" element={<Sales />} />
           <Route path="/MugSet" element={<MugSet />} />
+          <Route path="/TravelMug" element={<TravelMug />} />
           <Route path="/Pendants" element={<Pendants />} />
           <Route path="/Earrings" element={<Earrings />} />
           <Route path="/Bracelet" element={<Bracelet />} />
@@ -125,8 +135,17 @@ export default function App() {
           <Route path="/Drinkware" element={<Drinkware />} />
           <Route path="/Bowl" element={<Bowl />} />
           <Route path="/Womenaccessories" element={<Womenaccessories />} />
+          <Route path="/Combooffers" element={<Combooffers />} />
           <Route path="/homeDecore" element={<HomeDecore />} />
+          <Route path="/Homeessentials" element={<Homeessentials />} />
+
           <Route path="/Jars" element={<Jars />} />
+          <Route path="/signup" element={<Signup/>} />
+          <Route path="/login" element={<Login/>} />
+          <Route path="/MyOrder" element={< MyOrder />} />
+          <Route path="/UserProfile" element={< UserProfile />} />
+
+
 
         </Route>
 
@@ -137,6 +156,7 @@ export default function App() {
           <Route path="orders/:id" element={<OrderDetails />} />
           <Route path="products" element={<Products />} />
           <Route path="categories" element={<Categories />} />
+          <Route path="subcategories" element={<SubCategories />} />
           <Route path="customers" element={<Customers />} />
           <Route path="coupons" element={<Coupons />} />
           <Route path="banners" element={<Banners />} />

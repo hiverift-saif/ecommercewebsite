@@ -2,14 +2,20 @@ import { useFilter } from "../context/FilterContext";
 import { useCart } from "../context/CartContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
-
 import { useState, useEffect } from "react";
 
 export default function Aromadiffusers() {
-  const { isFilterOpen, setIsFilterOpen, filteredProducts, setFilteredProducts } = useFilter();
+  const {
+    isFilterOpen,
+    setIsFilterOpen,
+    setAllProducts,
+    filteredProducts,
+    setFilteredProducts
+  } = useFilter();
+
   const { addItem } = useCart();
 
-  // ORIGINAL PRODUCTS
+  // PRODUCTS LIST
   const products = [
     {
       id: 101,
@@ -17,9 +23,11 @@ export default function Aromadiffusers() {
       originalPrice: 1999,
       salePrice: 1299,
       discount: "-35%",
-      category: "Aroma Diffuser",
+      category: "aroma diffuser",
+      subcategory: "diffuser",
+      inStock: true,
       images: [
-         "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_605x.progressive.jpg?v=1724153805",
+        "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_605x.progressive.jpg?v=1724153805",
         "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300468_605x.jpg?v=1724153805",
       ],
     },
@@ -29,9 +37,11 @@ export default function Aromadiffusers() {
       originalPrice: 1499,
       salePrice: 899,
       discount: "-40%",
-      category: "Ceramic",
+      category: "ceramic",
+      subcategory: "lamp",
+      inStock: true,
       images: [
-         "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_605x.progressive.jpg?v=1724153805",
+        "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_605x.progressive.jpg?v=1724153805",
         "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300468_605x.jpg?v=1724153805",
       ],
     },
@@ -41,7 +51,9 @@ export default function Aromadiffusers() {
       originalPrice: 999,
       salePrice: 599,
       discount: "-38%",
-      category: "Oil Burner",
+      category: "oil burner",
+      subcategory: "burner",
+      inStock: true,
       images: [
         "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_605x.progressive.jpg?v=1724153805",
         "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300468_605x.jpg?v=1724153805",
@@ -49,14 +61,15 @@ export default function Aromadiffusers() {
     },
   ];
 
-  // LOAD ALL PRODUCTS INITIALLY
+  // ⭐ LOAD PRODUCTS INTO FILTER CONTEXT
   useEffect(() => {
-    setFilteredProducts(products);
+    setAllProducts(products);        // master data
+    setFilteredProducts(products);   // default show all
   }, []);
 
   return (
-    <div className="w-full   relative">
-
+    <div className="w-full relative">
+      
       {/* Banner */}
       <div className="hidden sm:block">
         <img
@@ -65,7 +78,6 @@ export default function Aromadiffusers() {
           alt="Aroma Banner"
         />
       </div>
-
       <div className="block sm:hidden">
         <img
           src="https://www.earthstore.in/cdn/shop/files/The_Earth_Store_Aroma_diffusers_550x.progressive.png.jpg?v=1736142322"
@@ -74,26 +86,24 @@ export default function Aromadiffusers() {
         />
       </div>
 
-      {/* SIDEBAR FILTER */}
-      <SidebarFilter
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-      />
+      {/* Sidebar */}
+      <SidebarFilter isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
 
-      {/* FILTER HEADER */}
+      {/* Filter Header */}
       <FilterHeader total={filteredProducts.length} />
 
-      {/* PRODUCT LIST */}
+      {/* Products Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 px-5 gap-8 mb-10 mt-10">
         {filteredProducts.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}
       </div>
+
     </div>
   );
 }
 
-/* ---------------- PRODUCT CARD ---------------- */
+/* --------- PRODUCT CARD ----------- */
 function ProductCard({ product }) {
   const { addItem } = useCart();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -115,7 +125,7 @@ function ProductCard({ product }) {
           </span>
         </div>
 
-        {/* Image Switch Buttons */}
+        {/* image dots */}
         {product.images.length > 1 && (
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
             {product.images.map((_, index) => (
@@ -131,14 +141,12 @@ function ProductCard({ product }) {
         )}
       </div>
 
-      {/* DETAILS */}
       <h3 className="text-lg font-semibold mt-3">{product.title}</h3>
       <div className="flex gap-2 items-center mt-1">
         <span className="text-xl font-bold">₹{product.salePrice}</span>
         <span className="line-through text-gray-500">₹{product.originalPrice}</span>
       </div>
 
-      {/* ADD TO CART */}
       <button
         onClick={() =>
           addItem({
@@ -148,10 +156,11 @@ function ProductCard({ product }) {
             image: product.images[0],
           })
         }
-        className="mt-3 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600 flex items-center justify-center gap-2"
+        className="mt-3 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600"
       >
-        Add to Cart
+        Add To Cart
       </button>
+
     </div>
   );
 }

@@ -39,6 +39,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
           <SidebarLink to="/admin/orders" icon={<ShoppingCart />} label="Orders" onClick={setMobileOpen} />
           <SidebarLink to="/admin/products" icon={<Package />} label="Products" onClick={setMobileOpen} />
           <SidebarLink to="/admin/categories" icon={<Package />} label="Categories" onClick={setMobileOpen} />
+          <SidebarLink to="/admin/subcategories" icon={<Package />} label="SubCategories" onClick={setMobileOpen} />
           <SidebarLink to="/admin/customers" icon={<Users />} label="Customers" onClick={setMobileOpen} />
           <SidebarLink to="/admin/coupons" icon={<Percent />} label="Coupons" onClick={setMobileOpen} />
           <SidebarLink to="/admin/banners" icon={<RectangleHorizontal  />} label="Banners" onClick={setMobileOpen} />

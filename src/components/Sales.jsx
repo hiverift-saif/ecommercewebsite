@@ -1,75 +1,71 @@
-import React, { useEffect, useState } from "react";
 import { useFilter } from "../context/FilterContext";
 import { useCart } from "../context/CartContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
+import { useState, useEffect } from "react";
 
-export default function Cookware() {
-  const { isFilterOpen, setIsFilterOpen, setAllProducts, filteredProducts, setFilteredProducts } = useFilter();
+export default function Sales() {
+  const { isFilterOpen, setIsFilterOpen, filteredProducts, setFilteredProducts } = useFilter();
   const { addItem } = useCart();
 
-  // ⭐ COOKWARE PRODUCTS LIST
+  // SALE PRODUCTS (DUMMY for now)
   const products = [
     {
       id: 501,
-      title: "Non-Stick Deep Fry Pan",
+      title: "Premium Aroma Diffuser",
       originalPrice: 1999,
-      salePrice: 1499,
-      discount: "-25%",
-      category: "Cookware",
+      salePrice: 1299,
+      discount: "-35%",
+      category: "Diffuser",
       images: [
-        "https://images.unsplash.com/photo-1606857521015-7f589c0d30f9?w=600",
-        "https://images.unsplash.com/photo-1606857521015-7f589c0d30f9?w=600&2",
+        "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_605x.progressive.jpg?v=1724153805",
+        "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300468_605x.jpg?v=1724153805",
       ],
-      inStock: true,
     },
     {
       id: 502,
-      title: "Premium Steel Kadhai",
-      originalPrice: 2499,
-      salePrice: 1699,
-      discount: "-32%",
-      category: "Cookware",
+      title: "Ceramic Aroma Lamp",
+      originalPrice: 1499,
+      salePrice: 999,
+      discount: "-33%",
+      category: "Lamp",
       images: [
-        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600",
-        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&2",
+        "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300468_605x.jpg?v=1724153805",
+        "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_605x.progressive.jpg?v=1724153805",
       ],
-      inStock: true,
     },
     {
       id: 503,
-      title: "Flat Non-Stick Tawa",
-      originalPrice: 1499,
-      salePrice: 899,
-      discount: "-40%",
-      category: "Cookware",
+      title: "Designer Mug Set",
+      originalPrice: 1999,
+      salePrice: 1499,
+      discount: "-25%",
+      category: "Mugs",
       images: [
-        "https://images.unsplash.com/photo-1606857520997-abc3ef339a37?w=600",
-        "https://images.unsplash.com/photo-1606857520997-abc3ef339a37?w=600&2",
+        "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_605x.progressive.jpg?v=1724153805",
+        "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300468_605x.jpg?v=1724153805",
       ],
-      inStock: false,
     },
   ];
 
-  // ⭐ LOAD PRODUCTS INTO CONTEXT
+  // LOAD INIT PRODUCTS
   useEffect(() => {
-    setAllProducts(products);
     setFilteredProducts(products);
   }, []);
 
   return (
-    <div className="w-full relative">
+    <div className="w-full px-4 py-6 relative">
 
-      {/* Sidebar Filter */}
+      {/* SIDEBAR FILTER */}
       <SidebarFilter
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
       />
 
-      {/* Header */}
+      {/* FILTER HEADER */}
       <FilterHeader total={filteredProducts.length} />
 
-      {/* PRODUCT LIST */}
+      {/* PRODUCT GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 px-5 gap-8 mb-10 mt-10">
         {filteredProducts.map((p) => (
           <ProductCard key={p.id} product={p} />
@@ -79,7 +75,8 @@ export default function Cookware() {
   );
 }
 
-// ⭐ PRODUCT CARD COMPONENT
+
+/* ------------- PRODUCT CARD (SAME DESIGN) ------------- */
 function ProductCard({ product }) {
   const { addItem } = useCart();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -92,15 +89,17 @@ function ProductCard({ product }) {
         <img
           src={product.images[currentIndex]}
           className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+          alt={product.title}
         />
 
+        {/* DISCOUNT BADGE */}
         <div className="absolute top-3 left-3">
           <span className="bg-red-600 text-white text-xs px-2 py-1 rounded">
             {product.discount}
           </span>
         </div>
 
-        {/* small image selectors */}
+        {/* Image indicators */}
         {product.images.length > 1 && (
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
             {product.images.map((_, index) => (
@@ -134,7 +133,7 @@ function ProductCard({ product }) {
             image: product.images[0],
           })
         }
-        className="mt-3 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600 flex items-center justify-center gap-2"
+        className="mt-3 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600 flex items-center justify-center"
       >
         Add to Cart
       </button>

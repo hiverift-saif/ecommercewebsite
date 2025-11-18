@@ -17,47 +17,48 @@ const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/gif"];
 const defaultCategories = [
   {
     id: 1,
-    name: "Plates",
-    count: 45,
-    img: "https://images.unsplash.com/photo-1578749556568-bc2c40e68b61?w=400&h=400&fit=crop",
+    name: "Decor",
+    count: 120,
+    img: "https://www.earthstore.in/cdn/shop/files/Peaceful_Buddha_-_The_Earth_Store_-_-_-2302726_400x.jpg",
   },
   {
     id: 2,
-    name: "Bowls",
-    count: 32,
-    img: "https://images.unsplash.com/photo-1610701596007-11502861dcfa?w=400&h=400&fit=crop",
+    name: "Drinkware",
+    count: 85,
+    img: "https://www.earthstore.in/cdn/shop/files/Solid_Multicolor_Coffee_Mug_Set_of_6_-_The_Earth_Store_-_-_-2304533_400x.jpg",
   },
   {
     id: 3,
-    name: "Cups",
-    count: 28,
-    img: "https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?w=400&h=400&fit=crop",
+    name: "Tableware",
+    count: 98,
+    img: "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_400x.jpg",
   },
   {
     id: 4,
-    name: "Dinner Sets",
-    count: 18,
-    img: "https://images.unsplash.com/photo-1584990347449-39c08c5e3194?w=400&h=400&fit=crop",
+    name: "Home Essentials",
+    count: 52,
+    img: "https://www.earthstore.in/cdn/shop/files/Peaceful_Buddha_-_The_Earth_Store_-_-_-2302729_400x.jpg",
   },
   {
     id: 5,
-    name: "Glassware",
-    count: 56,
-    img: "https://images.unsplash.com/photo-1510627489930-0c1b0bfb6785?w=400&h=400&fit=crop",
+    name: "Sale",
+    count: 40,
+    img: "https://www.earthstore.in/cdn/shop/files/The_Earth_Store_Aroma_diffusers_550x.progressive.png.jpg",
   },
   {
     id: 6,
-    name: "Cutlery",
-    count: 42,
-    img: "https://images.unsplash.com/photo-1606390932827-efe0b2a1ab59?w=400&h=400&fit=crop",
+    name: "Combo",
+    count: 18,
+    img: "https://www.earthstore.in/cdn/shop/files/Solid_Multicolor_Coffee_Mug_Set_of_6_-_The_Earth_Store_-_-_-2304533_400x.jpg",
   },
   {
     id: 7,
-    name: "Serving",
-    count: 27,
-    img: "https://images.unsplash.com/photo-1609899494106-1637414e3092?w=400&h=400&fit=crop",
+    name: "Women Accessories",
+    count: 60,
+    img: "https://www.earthstore.in/cdn/shop/files/Peaceful_Buddha_-_The_Earth_Store_-_-_-2302726_400x.jpg",
   },
 ];
+
 
 export default function Categories() {
   // categories state (replace with fetching from API)

@@ -15,7 +15,7 @@ import PayTM from "../assets/PayTM_22.webp";
 import Master from "../assets/Master_22.png";
 
 // --- Your logo import ---
-import Logo from "../assets/logo.png"; // change to your logo path
+import Logo from "../assets/logo3.png"; // change to your logo path
 
 const FooterTape = () => {
   return (

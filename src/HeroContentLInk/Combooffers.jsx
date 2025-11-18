@@ -1,57 +1,58 @@
 import React, { useEffect, useState } from "react";
 import { useFilter } from "../context/FilterContext";
 import { useCart } from "../context/CartContext";
+
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
 
-export default function Cookware() {
+export default function Combooffers() {
   const { isFilterOpen, setIsFilterOpen, setAllProducts, filteredProducts, setFilteredProducts } = useFilter();
   const { addItem } = useCart();
 
-  // ⭐ COOKWARE PRODUCTS LIST
+  // ⭐ COMBO PRODUCTS
   const products = [
     {
-      id: 501,
-      title: "Non-Stick Deep Fry Pan",
-      originalPrice: 1999,
-      salePrice: 1499,
-      discount: "-25%",
-      category: "Cookware",
-      images: [
-        "https://images.unsplash.com/photo-1606857521015-7f589c0d30f9?w=600",
-        "https://images.unsplash.com/photo-1606857521015-7f589c0d30f9?w=600&2",
-      ],
+      id: 201,
+      title: "Classic Mug Gift Combo (Set of 2)",
+      originalPrice: 999,
+      salePrice: 699,
+      discount: "-30%",
+      category: "Combo",
       inStock: true,
+      images: [
+        "https://www.earthstore.in/cdn/shop/files/mug_combo1_605x.jpg",
+        "https://www.earthstore.in/cdn/shop/files/mug_combo2_605x.jpg",
+      ],
     },
     {
-      id: 502,
-      title: "Premium Steel Kadhai",
+      id: 202,
+      title: "Premium Cooking Combo Set",
       originalPrice: 2499,
-      salePrice: 1699,
-      discount: "-32%",
-      category: "Cookware",
-      images: [
-        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600",
-        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&2",
-      ],
+      salePrice: 1799,
+      discount: "-28%",
+      category: "Combo",
       inStock: true,
+      images: [
+        "https://www.earthstore.in/cdn/shop/files/cookware_combo1_605x.jpg",
+        "https://www.earthstore.in/cdn/shop/files/cookware_combo2_605x.jpg",
+      ],
     },
     {
-      id: 503,
-      title: "Flat Non-Stick Tawa",
+      id: 203,
+      title: "Kitchen Essentials Gift Pack",
       originalPrice: 1499,
-      salePrice: 899,
-      discount: "-40%",
-      category: "Cookware",
-      images: [
-        "https://images.unsplash.com/photo-1606857520997-abc3ef339a37?w=600",
-        "https://images.unsplash.com/photo-1606857520997-abc3ef339a37?w=600&2",
-      ],
+      salePrice: 999,
+      discount: "-33%",
+      category: "Combo",
       inStock: false,
+      images: [
+        "https://www.earthstore.in/cdn/shop/files/kitchen_combo1_605x.jpg",
+        "https://www.earthstore.in/cdn/shop/files/kitchen_combo2_605x.jpg",
+      ],
     },
   ];
 
-  // ⭐ LOAD PRODUCTS INTO CONTEXT
+  // ⭐ LOAD PRODUCTS INTO FILTER CONTEXT
   useEffect(() => {
     setAllProducts(products);
     setFilteredProducts(products);
@@ -59,17 +60,14 @@ export default function Cookware() {
 
   return (
     <div className="w-full relative">
+      
+      {/* SIDEBAR FILTER */}
+      <SidebarFilter isOpen={isFilterOpen} onClose={() => setIsFilterOpen(false)} />
 
-      {/* Sidebar Filter */}
-      <SidebarFilter
-        isOpen={isFilterOpen}
-        onClose={() => setIsFilterOpen(false)}
-      />
-
-      {/* Header */}
+      {/* FILTER HEADER */}
       <FilterHeader total={filteredProducts.length} />
 
-      {/* PRODUCT LIST */}
+      {/* PRODUCT GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 px-5 gap-8 mb-10 mt-10">
         {filteredProducts.map((p) => (
           <ProductCard key={p.id} product={p} />
@@ -79,7 +77,8 @@ export default function Cookware() {
   );
 }
 
-// ⭐ PRODUCT CARD COMPONENT
+/* ---------------------------- PRODUCT CARD ---------------------------- */
+
 function ProductCard({ product }) {
   const { addItem } = useCart();
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -87,29 +86,31 @@ function ProductCard({ product }) {
   return (
     <div className="group bg-white rounded-xl shadow hover:shadow-xl transition p-3 overflow-hidden">
 
-      {/* IMAGE */}
+      {/* IMAGE SECTION */}
       <div className="relative aspect-square overflow-hidden">
         <img
           src={product.images[currentIndex]}
           className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+          alt={product.title}
         />
 
+        {/* DISCOUNT */}
         <div className="absolute top-3 left-3">
           <span className="bg-red-600 text-white text-xs px-2 py-1 rounded">
             {product.discount}
           </span>
         </div>
 
-        {/* small image selectors */}
+        {/* IMAGE DOTS */}
         {product.images.length > 1 && (
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-            {product.images.map((_, index) => (
+            {product.images.map((_, idx) => (
               <div
-                key={index}
+                key={idx}
                 className={`w-3 h-3 rounded-full cursor-pointer ${
-                  currentIndex === index ? "bg-white" : "bg-white/50"
+                  currentIndex === idx ? "bg-white" : "bg-white/50"
                 }`}
-                onClick={() => setCurrentIndex(index)}
+                onClick={() => setCurrentIndex(idx)}
               />
             ))}
           </div>
@@ -134,7 +135,7 @@ function ProductCard({ product }) {
             image: product.images[0],
           })
         }
-        className="mt-3 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600 flex items-center justify-center gap-2"
+        className="mt-3 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600"
       >
         Add to Cart
       </button>

@@ -1,57 +1,65 @@
 import React, { useEffect, useState } from "react";
 import { useFilter } from "../context/FilterContext";
 import { useCart } from "../context/CartContext";
+
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
 
-export default function Cookware() {
-  const { isFilterOpen, setIsFilterOpen, setAllProducts, filteredProducts, setFilteredProducts } = useFilter();
+export default function TravelMug() {
+  const {
+    isFilterOpen,
+    setIsFilterOpen,
+    setAllProducts,
+    filteredProducts,
+    setFilteredProducts,
+  } = useFilter();
+
   const { addItem } = useCart();
 
-  // ⭐ COOKWARE PRODUCTS LIST
+  // ⭐ TRAVEL MUG PRODUCTS
   const products = [
     {
       id: 501,
-      title: "Non-Stick Deep Fry Pan",
-      originalPrice: 1999,
-      salePrice: 1499,
-      discount: "-25%",
-      category: "Cookware",
-      images: [
-        "https://images.unsplash.com/photo-1606857521015-7f589c0d30f9?w=600",
-        "https://images.unsplash.com/photo-1606857521015-7f589c0d30f9?w=600&2",
-      ],
+      title: "Stainless Steel Travel Mug",
+      originalPrice: 1499,
+      salePrice: 999,
+      discount: "-33%",
+      category: "Travel Mug",
       inStock: true,
+      images: [
+        "https://www.earthstore.in/cdn/shop/files/travelmug1_605x.jpg",
+        "https://www.earthstore.in/cdn/shop/files/travelmug2_605x.jpg",
+      ],
     },
     {
       id: 502,
-      title: "Premium Steel Kadhai",
-      originalPrice: 2499,
-      salePrice: 1699,
-      discount: "-32%",
-      category: "Cookware",
-      images: [
-        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600",
-        "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&2",
-      ],
+      title: "Double Wall Coffee Travel Mug",
+      originalPrice: 1299,
+      salePrice: 799,
+      discount: "-38%",
+      category: "Travel Mug",
       inStock: true,
+      images: [
+        "https://www.earthstore.in/cdn/shop/files/coffee_travel1_605x.jpg",
+        "https://www.earthstore.in/cdn/shop/files/coffee_travel2_605x.jpg",
+      ],
     },
     {
       id: 503,
-      title: "Flat Non-Stick Tawa",
-      originalPrice: 1499,
-      salePrice: 899,
-      discount: "-40%",
-      category: "Cookware",
-      images: [
-        "https://images.unsplash.com/photo-1606857520997-abc3ef339a37?w=600",
-        "https://images.unsplash.com/photo-1606857520997-abc3ef339a37?w=600&2",
-      ],
+      title: "Premium Hot & Cold Travel Bottle",
+      originalPrice: 1699,
+      salePrice: 1199,
+      discount: "-29%",
+      category: "Travel Mug",
       inStock: false,
+      images: [
+        "https://www.earthstore.in/cdn/shop/files/hotcold1_605x.jpg",
+        "https://www.earthstore.in/cdn/shop/files/hotcold2_605x.jpg",
+      ],
     },
   ];
 
-  // ⭐ LOAD PRODUCTS INTO CONTEXT
+  // ⭐ LOAD PRODUCTS INTO FILTER CONTEXT
   useEffect(() => {
     setAllProducts(products);
     setFilteredProducts(products);
@@ -59,18 +67,17 @@ export default function Cookware() {
 
   return (
     <div className="w-full relative">
-
-      {/* Sidebar Filter */}
+      {/* SIDEBAR FILTER */}
       <SidebarFilter
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
       />
 
-      {/* Header */}
+      {/* PAGE HEADER */}
       <FilterHeader total={filteredProducts.length} />
 
-      {/* PRODUCT LIST */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 px-5 gap-8 mb-10 mt-10">
+      {/* PRODUCT GRID */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 px-5 gap-8 my-10">
         {filteredProducts.map((p) => (
           <ProductCard key={p.id} product={p} />
         ))}
@@ -79,44 +86,47 @@ export default function Cookware() {
   );
 }
 
-// ⭐ PRODUCT CARD COMPONENT
+/* ---------------------------- PRODUCT CARD ---------------------------- */
+
 function ProductCard({ product }) {
   const { addItem } = useCart();
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [index, setIndex] = useState(0);
 
   return (
     <div className="group bg-white rounded-xl shadow hover:shadow-xl transition p-3 overflow-hidden">
 
-      {/* IMAGE */}
+      {/* PRODUCT IMAGE */}
       <div className="relative aspect-square overflow-hidden">
         <img
-          src={product.images[currentIndex]}
+          src={product.images[index]}
           className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
+          alt={product.title}
         />
 
+        {/* DISCOUNT BADGE */}
         <div className="absolute top-3 left-3">
           <span className="bg-red-600 text-white text-xs px-2 py-1 rounded">
             {product.discount}
           </span>
         </div>
 
-        {/* small image selectors */}
+        {/* IMAGE SWITCH DOTS */}
         {product.images.length > 1 && (
           <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-            {product.images.map((_, index) => (
+            {product.images.map((_, i) => (
               <div
-                key={index}
+                key={i}
                 className={`w-3 h-3 rounded-full cursor-pointer ${
-                  currentIndex === index ? "bg-white" : "bg-white/50"
+                  index === i ? "bg-white" : "bg-white/50"
                 }`}
-                onClick={() => setCurrentIndex(index)}
+                onClick={() => setIndex(i)}
               />
             ))}
           </div>
         )}
       </div>
 
-      {/* DETAILS */}
+      {/* PRODUCT DETAILS */}
       <h3 className="text-lg font-semibold mt-3">{product.title}</h3>
 
       <div className="flex gap-2 items-center mt-1">
@@ -124,7 +134,7 @@ function ProductCard({ product }) {
         <span className="line-through text-gray-500">₹{product.originalPrice}</span>
       </div>
 
-      {/* ADD TO CART */}
+      {/* ADD TO CART BUTTON */}
       <button
         onClick={() =>
           addItem({
@@ -134,7 +144,7 @@ function ProductCard({ product }) {
             image: product.images[0],
           })
         }
-        className="mt-3 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600 flex items-center justify-center gap-2"
+        className="mt-3 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600"
       >
         Add to Cart
       </button>

@@ -10,8 +10,10 @@ export default function Glassware() {
     setIsFilterOpen,
     filteredProducts,
     setFilteredProducts,
+    setAllProducts
   } = useFilter();
 
+  
   const { addItem } = useCart();
 
   // 🔥 SAME IMAGES YOU GAVE
@@ -53,6 +55,7 @@ export default function Glassware() {
 
   // Load products into filter
   useEffect(() => {
+    setAllProducts(products);        //
     setFilteredProducts(products);
   }, []);
 
