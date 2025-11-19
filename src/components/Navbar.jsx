@@ -321,7 +321,7 @@ const Navbar = ({ onCartOpen }) => {
   key={p.id}
   className="flex items-center gap-3 p-2 border-b cursor-pointer hover:bg-gray-100"
   onClick={() => {
-    navigate(p.route || "/");  // ⭐ Route pe navigate
+      navigate(`/product/${p.id}`); // ⭐ Route pe navigate
     setSearchOpen(false);      // Popup close
   }}
 >

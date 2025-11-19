@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useFilter } from "../context/FilterContext";
 import { useCart } from "../context/CartContext";
+import { useSearch } from "../context/SearchContext";   // ⭐ FIX ADDED
 
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
@@ -16,6 +17,7 @@ export default function MugSet() {
   } = useFilter();
 
   const { addItem } = useCart();
+  const { setAllWebsiteProducts } = useSearch();  // ⭐ FIX ADDED
 
   // ⭐ PRODUCT LIST
   const products = [
@@ -27,6 +29,8 @@ export default function MugSet() {
       salePrice: 1299,
       discount: "-35%",
       inStock: true,
+      route: "/product/701",   // ⭐ FIXED ROUTE WITH UNIQUE ID
+
       images: [
         "https://www.earthstore.in/cdn/shop/files/Solid_Multicolor_Coffee_Mug_Set_of_6_-_The_Earth_Store_-_-_-2304533_605x.progressive.jpg?v=1723312614",
         "https://www.earthstore.in/cdn/shop/files/Peaceful_Buddha_-_The_Earth_Store_-_-_-2302729_605x.jpg?v=1723307155",
@@ -40,6 +44,8 @@ export default function MugSet() {
       salePrice: 899,
       discount: "-40%",
       inStock: true,
+      route: "/product/702",
+
       images: [
         "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_605x.progressive.jpg?v=1724153805",
         "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300468_605x.jpg?v=1724153805",
@@ -53,6 +59,8 @@ export default function MugSet() {
       salePrice: 599,
       discount: "-45%",
       inStock: false,
+      route: "/product/703",
+
       images: [
         "https://www.earthstore.in/cdn/shop/files/Peaceful_Buddha_-_The_Earth_Store_-_-_-2302726_605x.progressive.jpg?v=1723307155",
         "https://www.earthstore.in/cdn/shop/files/Solid_Multicolor_Coffee_Mug_Set_of_6_-_The_Earth_Store_-_-_-2304533_605x.progressive.jpg?v=1723312614",
@@ -60,10 +68,11 @@ export default function MugSet() {
     },
   ];
 
-  // ⭐ Load products into FilterContext
+  // ⭐ Load products
   useEffect(() => {
     setAllProducts(products);
     setFilteredProducts(products);
+    setAllWebsiteProducts(products);   // ⭐ SEARCH FIXED
   }, []);
 
   // ⭐ IMAGE SLIDER INDEX
@@ -87,8 +96,7 @@ export default function MugSet() {
     });
   };
 
-  // ⭐ Add to Cart
-  const addToCart = (product) => {
+  const addToCartHandler = (product) => {
     addItem({
       id: product.id,
       title: product.title,
@@ -100,39 +108,32 @@ export default function MugSet() {
 
   return (
     <div className="px-4 py-6 md:px-0 md:py-0">
-
-      {/* FILTER SIDEBAR */}
       <SidebarFilter
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
       />
 
       <div className="flex-1">
-        {/* HEADER */}
         <FilterHeader total={filteredProducts.length} />
 
-        {/* GRID */}
         <div className="mt-10 px-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredProducts.map((product, i) => (
             <div
               key={product.id}
               className="group bg-white shadow-md rounded-2xl overflow-hidden transition hover:shadow-2xl"
             >
-              {/* IMAGE SECTION */}
               <div className="relative aspect-square bg-gray-100">
                 <img
                   src={product.images[imageIndex[i]]}
                   className="w-full h-full object-cover transition duration-500 group-hover:scale-105"
                 />
 
-                {/* Discount */}
                 <div className="absolute top-3 left-3">
                   <span className="bg-red-600 text-white text-xs px-3 py-1 rounded">
                     {product.discount}
                   </span>
                 </div>
 
-                {/* Slider Buttons */}
                 {product.images.length > 1 && (
                   <div className="absolute bottom-4 inset-x-0 flex justify-center opacity-0 group-hover:opacity-100 transition">
                     <div className="flex gap-3 bg-white/90 p-2 rounded-full shadow">
@@ -153,7 +154,6 @@ export default function MugSet() {
                 )}
               </div>
 
-              {/* DETAILS */}
               <div className="p-5">
                 <h3 className="text-lg font-medium line-clamp-2 mb-3">
                   {product.title}
@@ -169,7 +169,7 @@ export default function MugSet() {
                 </div>
 
                 <button
-                  onClick={() => addToCart(product)}
+                  onClick={() => addToCartHandler(product)}
                   className="w-full bg-teal-500 text-white py-3.5 rounded-lg hover:bg-teal-600"
                 >
                   ADD TO CART

@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from "react";
+// src/Decors/TableDecor.jsx
 import { useFilter } from "../context/FilterContext";
-import { useCart } from "../context/CartContext";
-
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
+import ResponsiveImage from "../TableDecorcontent/ResponsiveImage";
+import { useState, useEffect } from "react";
+import { useSearch } from "../context/SearchContext";
+import { useCart } from "../context/CartContext";
 
-export default function TravelMug() {
+export default function TableDecor() {
   const {
     isFilterOpen,
     setIsFilterOpen,
@@ -14,140 +16,128 @@ export default function TravelMug() {
     setFilteredProducts,
   } = useFilter();
 
+  const { setAllWebsiteProducts } = useSearch();   // ⭐ SEARCH FIX
   const { addItem } = useCart();
 
-  // ⭐ TRAVEL MUG PRODUCTS
+  // ⭐ PRODUCTS WITH ROUTE FIX
   const products = [
     {
-      id: 501,
-      title: "Stainless Steel Travel Mug",
+      id: 1,
+      title: "Modern Ceramic Vase",
+      category: "decor",
       originalPrice: 1499,
-      salePrice: 999,
-      discount: "-33%",
-      category: "Travel Mug",
+      salePrice: 899,
+      discount: "-40%",
       inStock: true,
+    // ⭐ ROUTE ADDED
       images: [
-        "https://www.earthstore.in/cdn/shop/files/travelmug1_605x.jpg",
-        "https://www.earthstore.in/cdn/shop/files/travelmug2_605x.jpg",
+        "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_605x.progressive.jpg?v=1724153805",
+        "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300468_605x.jpg?v=1724153805",
       ],
     },
     {
-      id: 502,
-      title: "Double Wall Coffee Travel Mug",
-      originalPrice: 1299,
-      salePrice: 799,
+      id: 2,
+      title: "Classic Glass Cup",
+      category: "glass",
+      originalPrice: 599,
+      salePrice: 349,
+      discount: "-42%",
+      inStock: true,
+
+      images: [
+        "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_605x.progressive.jpg?v=1724153805",
+        "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300468_605x.jpg?v=1724153805",
+      ],
+    },
+    {
+      id: 3,
+      title: "Minimal Coffee Mug",
+      category: "mug",
+      originalPrice: 799,
+      salePrice: 499,
       discount: "-38%",
-      category: "Travel Mug",
-      inStock: true,
-      images: [
-        "https://www.earthstore.in/cdn/shop/files/coffee_travel1_605x.jpg",
-        "https://www.earthstore.in/cdn/shop/files/coffee_travel2_605x.jpg",
-      ],
-    },
-    {
-      id: 503,
-      title: "Premium Hot & Cold Travel Bottle",
-      originalPrice: 1699,
-      salePrice: 1199,
-      discount: "-29%",
-      category: "Travel Mug",
       inStock: false,
+
       images: [
-        "https://www.earthstore.in/cdn/shop/files/hotcold1_605x.jpg",
-        "https://www.earthstore.in/cdn/shop/files/hotcold2_605x.jpg",
+        "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_605x.progressive.jpg?v=1724153805",
+        "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300468_605x.jpg?v=1724153805",
       ],
     },
   ];
 
-  // ⭐ LOAD PRODUCTS INTO FILTER CONTEXT
+  // ⭐ LOAD FOR FILTER + SEARCH BOTH
   useEffect(() => {
     setAllProducts(products);
     setFilteredProducts(products);
+    setAllWebsiteProducts(products);  // ⭐ MAIN FIX
   }, []);
 
+  const [imageIndex, setImageIndex] = useState(products.map(() => 0));
+
+  const addToCart = (product) => {
+    addItem({
+      id: product.id,
+      title: product.title,
+      price: product.salePrice,
+      image: product.images[0],
+      quantity: 1,
+    });
+  };
+
   return (
-    <div className="w-full relative">
-      {/* SIDEBAR FILTER */}
+    <div className="px-4 py-6 md:px-0 md:py-0">
+      <ResponsiveImage />
+
       <SidebarFilter
         isOpen={isFilterOpen}
         onClose={() => setIsFilterOpen(false)}
       />
 
-      {/* PAGE HEADER */}
-      <FilterHeader total={filteredProducts.length} />
+      <div className="flex-1 min-h-screen">
+        <FilterHeader total={filteredProducts.length} />
 
-      {/* PRODUCT GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 px-5 gap-8 my-10">
-        {filteredProducts.map((p) => (
-          <ProductCard key={p.id} product={p} />
-        ))}
-      </div>
-    </div>
-  );
-}
+        <div className="mt-10 px-10 mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredProducts.map((product, i) => (
+            <div
+              key={product.id}
+              className="group relative bg-white rounded-2xl shadow-md overflow-hidden hover:shadow-2xl transition-all duration-300"
+            >
+              
+              {/* ⭐ CLICKABLE IMAGE WILL OPEN DETAILS */}
+        
+                <div className="relative aspect-square bg-gray-100">
+                  <img
+                    src={product.images[imageIndex[i]]}
+                    className="w-full h-full object-cover transition-all duration-500 group-hover:scale-105"
+                  />
+                </div>
 
-/* ---------------------------- PRODUCT CARD ---------------------------- */
 
-function ProductCard({ product }) {
-  const { addItem } = useCart();
-  const [index, setIndex] = useState(0);
+              <div className="p-5">
+                <h3 className="text-lg font-medium text-gray-900 line-clamp-2 mb-3">
+                  {product.title}
+                </h3>
 
-  return (
-    <div className="group bg-white rounded-xl shadow hover:shadow-xl transition p-3 overflow-hidden">
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="text-sm text-gray-500 line-through">
+                    ₹{product.originalPrice}
+                  </span>
+                  <span className="text-2xl font-bold text-gray-900">
+                    ₹{product.salePrice}
+                  </span>
+                </div>
 
-      {/* PRODUCT IMAGE */}
-      <div className="relative aspect-square overflow-hidden">
-        <img
-          src={product.images[index]}
-          className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
-          alt={product.title}
-        />
-
-        {/* DISCOUNT BADGE */}
-        <div className="absolute top-3 left-3">
-          <span className="bg-red-600 text-white text-xs px-2 py-1 rounded">
-            {product.discount}
-          </span>
+                <button
+                  onClick={() => addToCart(product)}
+                  className="w-full bg-teal-500 hover:bg-teal-600 text-white font-medium py-3.5 rounded-lg flex justify-center gap-2"
+                >
+                  ADD TO CART
+                </button>
+              </div>
+            </div>
+          ))}
         </div>
-
-        {/* IMAGE SWITCH DOTS */}
-        {product.images.length > 1 && (
-          <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
-            {product.images.map((_, i) => (
-              <div
-                key={i}
-                className={`w-3 h-3 rounded-full cursor-pointer ${
-                  index === i ? "bg-white" : "bg-white/50"
-                }`}
-                onClick={() => setIndex(i)}
-              />
-            ))}
-          </div>
-        )}
       </div>
-
-      {/* PRODUCT DETAILS */}
-      <h3 className="text-lg font-semibold mt-3">{product.title}</h3>
-
-      <div className="flex gap-2 items-center mt-1">
-        <span className="text-xl font-bold">₹{product.salePrice}</span>
-        <span className="line-through text-gray-500">₹{product.originalPrice}</span>
-      </div>
-
-      {/* ADD TO CART BUTTON */}
-      <button
-        onClick={() =>
-          addItem({
-            id: product.id,
-            title: product.title,
-            price: product.salePrice,
-            image: product.images[0],
-          })
-        }
-        className="mt-3 w-full bg-teal-500 text-white py-2 rounded hover:bg-teal-600"
-      >
-        Add to Cart
-      </button>
     </div>
   );
 }

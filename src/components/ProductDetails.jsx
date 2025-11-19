@@ -47,9 +47,7 @@ export default function ProductDetails() {
               src={img}
               onClick={() => setActiveImg(i)}
               className={`w-24 h-24 rounded-lg cursor-pointer border ${
-                activeImg === i
-                  ? "border-teal-500"
-                  : "border-gray-300"
+                activeImg === i ? "border-teal-500" : "border-gray-300"
               }`}
             />
           ))}
@@ -61,12 +59,8 @@ export default function ProductDetails() {
         <h1 className="text-3xl font-bold">{product.title}</h1>
 
         <div className="flex items-center gap-4 mt-3">
-          <p className="text-2xl font-bold text-teal-600">
-            ₹{product.salePrice}
-          </p>
-          <p className="line-through text-gray-500 text-lg">
-            ₹{product.originalPrice}
-          </p>
+          <p className="text-2xl font-bold text-teal-600">₹{product.salePrice}</p>
+          <p className="line-through text-gray-500 text-lg">₹{product.originalPrice}</p>
         </div>
 
         <p className="mt-4 text-gray-600 leading-relaxed">

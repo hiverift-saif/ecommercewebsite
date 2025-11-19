@@ -1,536 +1,447 @@
-// src/admin/component/Categories.jsx
-import React, { useEffect, useRef, useState } from "react";
-import { Pencil, Trash2, Plus, X } from "lucide-react";
+// src/admin/pages/Categories.jsx
+import React, { useEffect, useState } from "react";
+import { Plus, X, Pencil, Trash2, Upload } from "lucide-react";
+import BASE from "../../config";
 
-/**
- * Upgraded / Pro-level Categories component
- * - Responsive grid (1/2/3/4 cols)
- * - Add / Edit / Delete modals with validation
- * - Image preview, file type + size check (10MB)
- * - Clean, smaller code and accessible markup
- * - Uses local state array (replace with API easily)
- */
-
-const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_TYPES = ["image/png", "image/jpeg", "image/jpg", "image/gif"];
-
-const defaultCategories = [
-  {
-    id: 1,
-    name: "Decor",
-    count: 120,
-    img: "https://www.earthstore.in/cdn/shop/files/Peaceful_Buddha_-_The_Earth_Store_-_-_-2302726_400x.jpg",
-  },
-  {
-    id: 2,
-    name: "Drinkware",
-    count: 85,
-    img: "https://www.earthstore.in/cdn/shop/files/Solid_Multicolor_Coffee_Mug_Set_of_6_-_The_Earth_Store_-_-_-2304533_400x.jpg",
-  },
-  {
-    id: 3,
-    name: "Tableware",
-    count: 98,
-    img: "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_400x.jpg",
-  },
-  {
-    id: 4,
-    name: "Home Essentials",
-    count: 52,
-    img: "https://www.earthstore.in/cdn/shop/files/Peaceful_Buddha_-_The_Earth_Store_-_-_-2302729_400x.jpg",
-  },
-  {
-    id: 5,
-    name: "Sale",
-    count: 40,
-    img: "https://www.earthstore.in/cdn/shop/files/The_Earth_Store_Aroma_diffusers_550x.progressive.png.jpg",
-  },
-  {
-    id: 6,
-    name: "Combo",
-    count: 18,
-    img: "https://www.earthstore.in/cdn/shop/files/Solid_Multicolor_Coffee_Mug_Set_of_6_-_The_Earth_Store_-_-_-2304533_400x.jpg",
-  },
-  {
-    id: 7,
-    name: "Women Accessories",
-    count: 60,
-    img: "https://www.earthstore.in/cdn/shop/files/Peaceful_Buddha_-_The_Earth_Store_-_-_-2302726_400x.jpg",
-  },
-];
-
+const PLACEHOLDER = "https://via.placeholder.com/400?text=No+Image";
 
 export default function Categories() {
-  // categories state (replace with fetching from API)
-  const [categories, setCategories] = useState(defaultCategories);
-
-  // modal states
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [addOpen, setAddOpen] = useState(false);
   const [editOpen, setEditOpen] = useState(false);
-  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [currentEdit, setCurrentEdit] = useState(null);
 
-  // add form
-  const [addName, setAddName] = useState("");
-  const [addFile, setAddFile] = useState(null);
-  const [addPreview, setAddPreview] = useState(null);
-  const addInputRef = useRef(null);
+  const initialForm = {
+    name: "",
+    description: "",
+    offer: "",
+    slug: "",
+    meta_title: "",
+    meta_description: "",
+    is_published: true,
+    categoryType: "groceries",
+    web_image: null,
+    app_image: null,
+  };
 
-  // edit form
-  const [editingIndex, setEditingIndex] = useState(null);
-  const [editName, setEditName] = useState("");
-  const [editFile, setEditFile] = useState(null);
-  const [editPreview, setEditPreview] = useState(null);
-  const editInputRef = useRef(null);
+  const [form, setForm] = useState(initialForm);
+  const [webPreview, setWebPreview] = useState(null);
+  const [appPreview, setAppPreview] = useState(null);
 
-  // delete index
-  const [deleteIndex, setDeleteIndex] = useState(null);
+  // Fetch all categories
+  const fetchCategories = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${BASE.BASE_URL}/category/getAllCategory`);
+      const data = await res.json();
 
-  // validation errors
-  const [formError, setFormError] = useState("");
+      if (res.ok && data.result) {
+        const formatted = data.result.map((c) => ({
+          id: c._id,
+          name: (c.name || "").split("\t")[0].trim(),
+          offer: (c.offer || "").split("\t")[0].trim(),
+          img: c.web_image?.[0] || c.app_image?.[0] || PLACEHOLDER,
+          raw: c,
+        }));
+        setCategories(formatted);
+      }
+    } catch (err) {
+      alert("Failed to load categories");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // cleanup object URLs on unmount or change
   useEffect(() => {
-    return () => {
-      if (addPreview) URL.revokeObjectURL(addPreview);
-      if (editPreview) URL.revokeObjectURL(editPreview);
-    };
-  }, [addPreview, editPreview]);
+    fetchCategories();
+  }, []);
 
-  // ---------- helpers ----------
-  const validateFile = (file) => {
-    if (!file) return null;
-    if (!ACCEPTED_TYPES.includes(file.type)) {
-      return "Invalid file type. Use PNG / JPG / GIF.";
-    }
-    if (file.size > MAX_FILE_SIZE) {
-      return "File too large. Max 10MB.";
-    }
-    return null;
+  const generateSlug = (name) =>
+    name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+
+  const handleNameChange = (e) => {
+    const name = e.target.value;
+    setForm((prev) => ({
+      ...prev,
+      name,
+      slug: generateSlug(name),
+      meta_title: name || prev.meta_title,
+    }));
   };
 
-  // ---------- ADD ----------
-  const openAdd = () => {
-    setFormError("");
-    setAddName("");
-    setAddFile(null);
-    if (addPreview) {
-      URL.revokeObjectURL(addPreview);
-      setAddPreview(null);
+  // ADD CATEGORY
+  const handleAdd = async () => {
+    if (!form.name.trim()) return setError("Category name is required!");
+
+    setSaving(true);
+    const formData = new FormData();
+    formData.append("name", form.name.trim());
+    formData.append("description", form.description || "");
+    formData.append("offer", form.offer);
+    formData.append("slug", form.slug);
+    formData.append("meta_title", form.meta_title || form.name);
+    formData.append("meta_description", form.meta_description);
+    formData.append("is_published", form.is_published);
+    formData.append("categoryType", form.categoryType);
+    if (form.web_image) formData.append("web_image", form.web_image);
+    if (form.app_image) formData.append("app_image", form.app_image);
+
+    try {
+      const res = await fetch(`${BASE.BASE_URL}/category/addCategory`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (res.ok) {
+        resetForm();
+        setAddOpen(false);
+        await fetchCategories();
+        alert("Category added successfully!");
+      } else {
+        const json = await res.json();
+        setError(json.message || "Failed to add category");
+      }
+    } catch (err) {
+      setError("Network error");
+    } finally {
+      setSaving(false);
     }
-    setAddOpen(true);
-    // focus input after open
-    setTimeout(() => addInputRef.current?.focus(), 50);
   };
 
-  const onAddFile = (e) => {
-    const file = e.target.files?.[0];
-    const err = validateFile(file);
-    if (err) {
-      setFormError(err);
-      return;
+  // EDIT CATEGORY - FULLY WORKING
+  const handleEdit = async () => {
+    if (!form.name.trim()) return setError("Category name is required!");
+
+    setSaving(true);
+    setError("");
+
+    const formData = new FormData();
+    formData.append("name", form.name.trim());
+    formData.append("description", form.description || "");
+    formData.append("offer", form.offer || "");
+    formData.append("slug", form.slug || generateSlug(form.name));
+    formData.append("meta_title", form.meta_title || form.name);
+    formData.append("meta_description", form.meta_description || "");
+    formData.append("is_published", form.is_published);
+    formData.append("categoryType", form.categoryType);
+
+    if (form.web_image && typeof form.web_image !== "string") {
+      formData.append("web_image", form.web_image);
     }
-    setFormError("");
-    if (addPreview) URL.revokeObjectURL(addPreview);
-    setAddFile(file);
-    setAddPreview(file ? URL.createObjectURL(file) : null);
-  };
-
-  const submitAdd = (e) => {
-    e.preventDefault();
-    setFormError("");
-    if (!addName.trim()) {
-      setFormError("Category name is required.");
-      return;
-    }
-    const id = Date.now();
-    const newCat = {
-      id,
-      name: addName.trim(),
-      count: 0,
-      img:
-        addPreview ||
-        `https://via.placeholder.com/400?text=${encodeURIComponent(addName.trim())}`,
-    };
-    setCategories((s) => [newCat, ...s]);
-    // cleanup & close
-    if (addPreview) URL.revokeObjectURL(addPreview);
-    setAddPreview(null);
-    setAddFile(null);
-    setAddOpen(false);
-  };
-
-  const closeAdd = () => {
-    setAddOpen(false);
-    setFormError("");
-    if (addPreview) URL.revokeObjectURL(addPreview);
-    setAddPreview(null);
-    setAddFile(null);
-  };
-
-  // ---------- EDIT ----------
-  const openEdit = (index) => {
-    const cat = categories[index];
-    setEditingIndex(index);
-    setEditName(cat.name);
-    setEditPreview(null);
-    setEditFile(null);
-    setFormError("");
-    setEditOpen(true);
-    setTimeout(() => editInputRef.current?.focus(), 50);
-  };
-
-  const onEditFile = (e) => {
-    const file = e.target.files?.[0];
-    const err = validateFile(file);
-    if (err) {
-      setFormError(err);
-      return;
-    }
-    setFormError("");
-    if (editPreview) URL.revokeObjectURL(editPreview);
-    setEditFile(file);
-    setEditPreview(file ? URL.createObjectURL(file) : null);
-  };
-
-  const submitEdit = (e) => {
-    e.preventDefault();
-    setFormError("");
-    if (editingIndex === null) return;
-    if (!editName.trim()) {
-      setFormError("Category name is required.");
-      return;
+    if (form.app_image && typeof form.app_image !== "string") {
+      formData.append("app_image", form.app_image);
     }
 
-    setCategories((prev) => {
-      const next = [...prev];
-      const current = { ...next[editingIndex] };
-      current.name = editName.trim();
-      if (editPreview) current.img = editPreview; // in real app replace with server url
-      next[editingIndex] = current;
-      return next;
+    try {
+      const res = await fetch(
+        `${BASE.BASE_URL}/category/editCategory/${currentEdit.id}`,
+        {
+          method: "PUT", // agar backend PATCH use kare to "PATCH" kar dena
+          body: formData,
+        }
+      );
+
+      const json = await res.json();
+
+      if (res.ok && json.statusCode === 200) {
+        resetForm();
+        setEditOpen(false);
+        await fetchCategories();
+        alert("Category updated successfully!");
+      } else {
+        setError(json.message || "Failed to update");
+      }
+    } catch (err) {
+      setError("Network error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // DELETE CATEGORY - API CALL
+  const handleDelete = async (id) => {
+    if (!window.confirm("Delete this category permanently?")) return;
+
+    try {
+      const res = await fetch(`${BASE.BASE_URL}/category/deleteCategory/${id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        setCategories((prev) => prev.filter((c) => c.id !== id));
+        alert("Category deleted!");
+      } else {
+        alert("Failed to delete");
+      }
+    } catch (err) {
+      alert("Network error");
+    }
+  };
+
+  // OPEN EDIT MODAL
+  const openEdit = (cat) => {
+    setCurrentEdit(cat);
+
+    const raw = cat.raw;
+    setForm({
+      name: (raw.name || "").split("\t")[0].trim(),
+      description: raw.description || "",
+      offer: (raw.offer || "").split("\t")[0].trim(),
+      slug: raw.slug || "",
+      meta_title: (raw.meta_title || "").split("\t")[0].trim(),
+      meta_description: raw.meta_description || "",
+      is_published: raw.is_published ?? true,
+      categoryType: (raw.categoryType || "groceries").split("\t")[0].trim(),
+      web_image: null,
+      app_image: null,
     });
 
-    // cleanup & close
-    if (editPreview) URL.revokeObjectURL(editPreview);
-    setEditPreview(null);
-    setEditFile(null);
-    setEditingIndex(null);
-    setEditOpen(false);
+    setWebPreview(raw.web_image?.[0] || PLACEHOLDER);
+    setAppPreview(raw.app_image?.[0] || raw.web_image?.[0] || PLACEHOLDER);
+    setEditOpen(true);
   };
 
-  const closeEdit = () => {
-    setEditOpen(false);
-    setEditingIndex(null);
-    setFormError("");
-    if (editPreview) URL.revokeObjectURL(editPreview);
-    setEditPreview(null);
-    setEditFile(null);
+  const resetForm = () => {
+    setForm(initialForm);
+    setWebPreview(null);
+    setAppPreview(null);
+    setError("");
+    setCurrentEdit(null);
   };
 
-  // ---------- DELETE ----------
-  const openDelete = (index) => {
-    setDeleteIndex(index);
-    setDeleteOpen(true);
-  };
-
-  const confirmDelete = () => {
-    if (deleteIndex === null) return;
-    setCategories((prev) => prev.filter((_, i) => i !== deleteIndex));
-    setDeleteOpen(false);
-    setDeleteIndex(null);
-  };
-
-  const closeDelete = () => {
-    setDeleteOpen(false);
-    setDeleteIndex(null);
-  };
-
-  // ---------- Accessibility: close modals with Esc ----------
-  useEffect(() => {
-    const onKey = (e) => {
-      if (e.key === "Escape") {
-        if (addOpen) closeAdd();
-        if (editOpen) closeEdit();
-        if (deleteOpen) closeDelete();
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [addOpen, editOpen, deleteOpen]);
-
-  // small presentational helpers
-  const circleClass = "w-24 h-24 object-cover rounded-full mb-4 border border-gray-200";
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-96">
+        <div className="text-xl text-gray-600">Loading categories...</div>
+      </div>
+    );
+  }
 
   return (
-    <main className="flex-1 overflow-y-auto p-6">
-      <div className="space-y-6">
-        {/* header */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <main className="p-4 md:p-6 min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-10">
           <div>
-            <h1 className="text-xl font-semibold">Categories</h1>
-            <p className="text-gray-600">Manage product categories</p>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-900">Categories</h1>
+            <p className="text-gray-600 mt-1">Manage your product categories</p>
           </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={openAdd}
-              className="inline-flex items-center gap-2 rounded-md text-sm font-medium bg-black text-white hover:bg-gray-800 h-9 px-4"
-            >
-              <Plus className="w-4 h-4" />
-              Add Category
-            </button>
-          </div>
+          <button
+            onClick={() => { resetForm(); setAddOpen(true); }}
+            className="bg-black text-white px-8 py-4 rounded-xl flex items-center gap-3 hover:bg-gray-800 transition font-semibold text-lg shadow-lg"
+          >
+            <Plus size={24} /> Add Category
+          </button>
         </div>
 
-        {/* grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {categories.map((cat, idx) => (
-            <article
-              key={cat.id}
-              className="bg-white flex flex-col gap-6 rounded-xl border border-gray-200"
-              aria-label={`${cat.name} category`}
-            >
-              <div className="p-6">
-                <div className="flex flex-col items-center text-center">
-                  <img src={cat.img} alt={cat.name} className={circleClass} />
-                  <h3 className="text-lg font-medium">{cat.name}</h3>
-                  <p className="text-sm text-gray-600 mb-4">{cat.count} Products</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6 lg:gap-8">
+          {categories.map((cat) => (
+            <div key={cat.id} className="bg-white rounded-3xl shadow-lg overflow-hidden border border-gray-200 flex flex-col">
+              <div className="p-6 pb-4 flex justify-center">
+                <img
+                  src={cat.img}
+                  alt={cat.name}
+                  className="w-32 h-32 sm:w-40 sm:h-40 object-cover rounded-full border-4 border-white shadow-xl"
+                  onError={(e) => (e.target.src = PLACEHOLDER)}
+                />
+              </div>
 
-                  <div className="flex gap-2 w-full">
-                    <button
-                      onClick={() => openEdit(idx)}
-                      className="flex-1 border rounded-md px-3 h-8 flex items-center justify-center hover:bg-gray-50 transition"
-                      aria-label={`Edit ${cat.name}`}
-                      title="Edit"
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </button>
+              <div className="px-6 pb-6 flex-1 flex flex-col justify-between">
+                <div className="text-center">
+                  <h3 className="text-xl font-bold text-gray-900 line-clamp-2">{cat.name}</h3>
+                  <p className="text-gray-500 mt-1">0 Products</p>
+                  {cat.offer && (
+                    <span className="inline-block mt-3 bg-gradient-to-r from-red-500 to-pink-600 text-white text-sm font-bold px-5 py-2 rounded-full">
+                      {cat.offer}
+                    </span>
+                  )}
+                </div>
 
-                    <button
-                      onClick={() => openDelete(idx)}
-                      className="flex-1 border rounded-md px-3 h-8 flex items-center justify-center hover:bg-gray-50 transition"
-                      aria-label={`Delete ${cat.name}`}
-                      title="Delete"
-                    >
-                      <Trash2 className="w-4 h-4 text-red-600" />
-                    </button>
-                  </div>
+                <div className="mt-6 flex gap-3">
+                  <button
+                    onClick={() => openEdit(cat)}
+                    className="flex-1 bg-gray-100 hover:bg-black hover:text-white text-gray-800 font-medium py-4 rounded-xl transition flex items-center justify-center gap-2"
+                  >
+                    <Pencil size={18} /> Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(cat.id)}
+                    className="flex-1 bg-red-100 hover:bg-red-600 text-red-600 hover:text-white font-medium py-4 rounded-xl transition flex items-center justify-center gap-2"
+                  >
+                    <Trash2 size={18} /> Delete
+                  </button>
                 </div>
               </div>
-            </article>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* ========== ADD MODAL ========== */}
-      {addOpen && (
+      {/* MODAL */}
+      {(addOpen || editOpen) && (
         <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4"
+          onClick={() => { setAddOpen(false); setEditOpen(false); resetForm(); }}
         >
           <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={closeAdd}
-            aria-hidden
-          />
-
-          <div className="relative z-10 w-full max-w-lg rounded-lg bg-white border border-gray-200 shadow-xl">
-            <header className="p-4 border-b border-gray-100 flex items-start justify-between">
-              <div>
-                <h2 className="text-lg font-semibold">Add New Category</h2>
-                <p className="text-sm text-gray-600">Create a new product category.</p>
-              </div>
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="sticky top-0 bg-white border-b px-6 py-5 flex justify-between items-center">
+              <h2 className="text-2xl font-bold">
+                {editOpen ? "Edit Category" : "Add New Category"}
+              </h2>
               <button
-                onClick={closeAdd}
-                className="p-2 rounded hover:bg-gray-100"
-                aria-label="Close add dialog"
+                onClick={() => { setAddOpen(false); setEditOpen(false); resetForm(); }}
+                className="p-3 hover:bg-gray-100 rounded-full"
               >
-                <X className="w-4 h-4" />
+                <X size={28} />
               </button>
-            </header>
+            </div>
 
-            <form onSubmit={submitAdd} className="p-4 space-y-4 max-h-[70vh] overflow-auto">
-              <div>
-                <label className="text-sm font-medium block">Category Name</label>
+            <div className="p-6 space-y-6">
+              <div className="space-y-5">
                 <input
-                  ref={addInputRef}
-                  value={addName}
-                  onChange={(e) => setAddName(e.target.value)}
-                  className="mt-1 h-9 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-black focus:ring-black"
-                  placeholder="e.g., Dinner Sets"
-                  required
-                  aria-required
+                  value={form.name}
+                  onChange={handleNameChange}
+                  placeholder="Category Name *"
+                  className="w-full border border-gray-300 rounded-xl px-5 py-4 text-lg outline-none focus:ring-4 focus:ring-black/10"
                 />
+                <textarea
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="Description"
+                  rows={3}
+                  className="w-full border border-gray-300 rounded-xl px-5 py-4 resize-none outline-none focus:ring-4 focus:ring-black/10"
+                />
+                <input
+                  value={form.offer}
+                  onChange={(e) => setForm({ ...form, offer: e.target.value })}
+                  placeholder="Offer (e.g. 10% off)"
+                  className="w-full border border-gray-300 rounded-xl px-5 py-4 outline-none focus:ring-4 focus:ring-black/10"
+                />
+                <input
+                  value={form.slug}
+                  readOnly
+                  placeholder="Slug (auto-generated)"
+                  className="w-full bg-gray-50 border border-gray-300 rounded-xl px-5 py-4 cursor-not-allowed"
+                />
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <input
+                    value={form.meta_title}
+                    onChange={(e) => setForm({ ...form, meta_title: e.target.value })}
+                    placeholder="Meta Title"
+                    className="w-full border border-gray-300 rounded-xl px-5 py-4 outline-none focus:ring-4 focus:ring-black/10"
+                  />
+                  <input
+                    value={form.meta_description}
+                    onChange={(e) => setForm({ ...form, meta_description: e.target.value })}
+                    placeholder="Meta Description"
+                    className="w-full border border-gray-300 rounded-xl px-5 py-4 outline-none focus:ring-4 focus:ring-black/10"
+                  />
+                </div>
+
+                {/* <select
+                  value={form.categoryType}
+                  onChange={(e) => setForm({ ...form, categoryType: e.target.value })}
+                  className="w-full border border-gray-300 rounded-xl px-5 py-4 outline-none focus:ring-4 focus:ring-black/10"
+                >
+                  <option value="groceries">Groceries</option>
+                  <option value="electronics">Electronics</option>
+                  <option value="fashion">Fashion</option>
+                  <option value="home">Home & Living</option>
+                </select> */}
+
+                <label className="flex items-center gap-4">
+                  <input
+                    type="checkbox"
+                    checked={form.is_published}
+                    onChange={(e) => setForm({ ...form, is_published: e.target.checked })}
+                    className="w-6 h-6 rounded text-black"
+                  />
+                  <span className="text-lg font-medium">Publish immediately</span>
+                </label>
               </div>
 
-              <div>
-                <label className="text-sm font-medium block">Category Image</label>
-                <div className="mt-2 flex items-start gap-4">
-                  <div className="w-20 h-20 rounded-full overflow-hidden border border-gray-200 flex items-center justify-center bg-gray-50">
-                    {addPreview ? (
-                      <img src={addPreview} alt="preview" className="w-full h-full object-cover" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div>
+                  <label className="block font-bold text-lg mb-3">Web Image</label>
+                  <label className="block border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer hover:border-black">
+                    {webPreview ? (
+                      <img src={webPreview} alt="web" className="mx-auto max-h-64 rounded-lg" />
                     ) : (
-                      <span className="text-xs text-gray-500">No image</span>
+                      <div className="space-y-3">
+                        <Upload size={50} className="mx-auto text-gray-400" />
+                        <p>Upload Web Image</p>
+                      </div>
                     )}
-                  </div>
-
-                  <div className="flex-1">
                     <input
                       type="file"
                       accept="image/*"
-                      onChange={onAddFile}
-                      aria-label="Upload category image"
-                      className=" border border-gray-200 rounded-md w-40 text-sm outline-none focus:border-black focus:ring-black"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setForm({ ...form, web_image: file });
+                          setWebPreview(URL.createObjectURL(file));
+                        }
+                      }}
                     />
-                    <p className="mt-1 text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                  </div>
+                  </label>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-lg mb-3">App Image (Optional)</label>
+                  <label className="block border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer hover:border-black">
+                    {appPreview ? (
+                      <img src={appPreview} alt="app" className="mx-auto max-h-64 rounded-lg" />
+                    ) : (
+                      <div className="space-y-3">
+                        <Upload size={50} className="mx-auto text-gray-400" />
+                        <p>Upload App Image</p>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                          setForm({ ...form, app_image: file });
+                          setAppPreview(URL.createObjectURL(file));
+                        }
+                      }}
+                    />
+                  </label>
                 </div>
               </div>
 
-              {formError && <p className="text-sm text-red-600">{formError}</p>}
+              {error && (
+                <p className="text-red-600 text-center font-bold bg-red-50 py-3 rounded-lg">
+                  {error}
+                </p>
+              )}
 
-              <div className="flex justify-end gap-2 pt-2">
+              <div className="flex flex-col sm:flex-row gap-4 pt-6">
                 <button
-                  type="button"
-                  onClick={closeAdd}
-                  className="inline-flex items-center justify-center gap-2 rounded-md text-sm border bg-white text-gray-700 h-9 px-4"
+                  onClick={() => { setAddOpen(false); setEditOpen(false); resetForm(); }}
+                  className="px-10 py-5 border-2 border-gray-300 rounded-xl text-lg font-bold hover:bg-gray-50"
+                  disabled={saving}
                 >
                   Cancel
                 </button>
-
                 <button
-                  type="submit"
-                  className="inline-flex items-center justify-center gap-2 rounded-md text-sm bg-black text-white h-9 px-4"
+                  onClick={addOpen ? handleAdd : handleEdit}
+                  disabled={saving}
+                  className="px-12 py-5 bg-black text-white rounded-xl text-lg font-bold hover:bg-gray-800 disabled:opacity-60 shadow-lg"
                 >
-                  Add Category
+                  {saving ? "Saving..." : editOpen ? "Update Category" : "Create Category"}
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ========== EDIT MODAL ========== */}
-      {editOpen && editingIndex !== null && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-        >
-          <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={closeEdit}
-            aria-hidden
-          />
-
-          <div className="relative z-10 w-full max-w-lg rounded-lg bg-white border border-gray-200 shadow-xl">
-            <header className="p-4 border-b border-gray-100 flex items-start justify-between">
-              <div>
-                <h2 className="text-lg font-semibold">Edit Category</h2>
-                <p className="text-sm text-gray-600">Update the category details below.</p>
-              </div>
-              <button
-                onClick={closeEdit}
-                className="p-2 rounded hover:bg-gray-100"
-                aria-label="Close edit dialog"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </header>
-
-            <form onSubmit={submitEdit} className="p-4 space-y-4 max-h-[70vh] overflow-auto">
-              <div>
-                <label className="text-sm font-medium block">Category Name</label>
-                <input
-                  ref={editInputRef}
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  className="mt-1 h-9 w-full rounded-md border border-gray-300 px-3 text-sm outline-none focus:border-black focus:ring-black"
-                  placeholder="e.g., Dinner Sets"
-                  required
-                  aria-required
-                />
-              </div>
-
-              <div>
-                <label className="text-sm font-medium block">Category Image</label>
-                <div className="mt-2 flex items-start gap-4">
-                  <div className="w-20 h-20 rounded-full overflow-hidden border border-gray-200 flex items-center justify-center bg-gray-50">
-                    <img
-                      src={
-                        editPreview ||
-                        categories[editingIndex]?.img ||
-                        "https://via.placeholder.com/400?text=No+Image"
-                      }
-                      alt="category preview"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-
-                  <div className="flex-1">
-                    <input type="file" accept="image/*" onChange={onEditFile} className="border border-gray-300 rounded-md w-40 text-sm outline-none focus:border-black focus:ring-black" />
-                    <p className="mt-1 text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
-                  </div>
-                </div>
-              </div>
-
-              {formError && <p className="text-sm text-red-600">{formError}</p>}
-
-              <div className="flex justify-end gap-2 pt-2">
-                <button
-                  type="button"
-                  onClick={closeEdit}
-                  className="inline-flex items-center justify-center gap-2 rounded-md text-sm border bg-white text-gray-700 h-9 px-4"
-                >
-                  Cancel
-                </button>
-
-                <button
-                  type="submit"
-                  className="inline-flex items-center justify-center gap-2 rounded-md text-sm bg-black text-white h-9 px-4"
-                >
-                  Update Category
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-
-      {/* ========== DELETE CONFIRM ========== */}
-      {deleteOpen && deleteIndex !== null && (
-        <div
-          role="alertdialog"
-          aria-modal="true"
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-        >
-          <div
-            className="fixed inset-0 bg-black/40 backdrop-blur-sm"
-            onClick={closeDelete}
-            aria-hidden
-          />
-
-          <div className="relative z-10 w-full max-w-md rounded-lg bg-white border border-gray-200 shadow-xl p-6">
-            <h3 className="text-lg font-semibold mb-2">Are you sure?</h3>
-            <p className="text-sm text-gray-600 mb-4">
-              This action cannot be undone. This will permanently delete the category.
-            </p>
-
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={closeDelete}
-                className="inline-flex items-center justify-center gap-2 rounded-md text-sm border bg-white text-gray-700 h-9 px-4"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={confirmDelete}
-                className="inline-flex items-center justify-center gap-2 rounded-md text-sm bg-black text-white h-9 px-4"
-              >
-                Delete
-              </button>
             </div>
           </div>
         </div>

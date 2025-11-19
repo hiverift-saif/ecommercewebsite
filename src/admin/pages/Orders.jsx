@@ -1,90 +1,213 @@
 // src/admin/pages/Orders.jsx
+import React, { useState, useEffect } from "react";
 import { Eye } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import BASE from "../../config";
 
 export default function Orders() {
   const navigate = useNavigate();
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const orders = [
-    {
-      id: "ORD-2024-1234",
-      customer: "John Smith",
-      email: "john@example.com",
-      items: 3,
-      amount: "$145.00",
-      payment: "Credit Card",
-      status: "Pending",
-      statusColor: "bg-yellow-100 text-yellow-800",
-      date: "2024-11-15",
-    },
-    {
-      id: "ORD-2024-1233",
-      customer: "Sarah Johnson",
-      email: "sarah@example.com",
-      items: 1,
-      amount: "$42.00",
-      payment: "PayPal",
-      status: "Processing",
-      statusColor: "bg-blue-100 text-blue-800",
-      date: "2024-11-15",
-    },
-  ];
+  // Status color mapping
+  const getStatusColor = (status) => {
+    switch (status.toLowerCase()) {
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "processing":
+        return "bg-blue-100 text-blue-800";
+      case "shipped":
+        return "bg-purple-100 text-purple-800";
+      case "delivered":
+        return "bg-green-100 text-green-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  // Fetch orders from real API
+  useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(`${BASE.BASE_URL}/orders`);
+        const data = await res.json();
+
+        if (res.ok && data.result) {
+          setOrders(data.result);
+        } else {
+          setError(data.message || "Failed to load orders");
+        }
+      } catch (err) {
+        console.error("Orders fetch error:", err);
+        setError("Network error. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchOrders();
+  }, []);
+
+  if (loading) {
+    return (
+      <main className="flex-1 p-6 bg-gray-50 min-h-screen">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl font-bold mb-8">Orders</h2>
+          <div className="bg-white rounded-2xl shadow-lg p-10 text-center">
+            <div className="text-xl text-gray-600">Loading orders...</div>
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (error) {
+    return (
+      <main className="flex-1 p-6 bg-gray-50 min-h-screen">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-3xl font-bold mb-8">Orders</h2>
+          <div className="bg-red-50 border border-red-200 text-red-700 p-6 rounded-xl">
+            {error}
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
-    <main className="flex-1 overflow-y-auto p-6">
-      <h2 className="text-2xl font-semibold mb-6">Orders</h2>
+    <main className="flex-1 p-6 bg-gray-50 min-h-screen">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h2 className="text-4xl font-bold text-gray-900">Orders</h2>
+            <p className="text-gray-600 mt-2">Manage and track all customer orders</p>
+          </div>
+          <div className="text-2xl font-bold text-gray-800">
+            Total: <span className="text-black">{orders.length}</span> Orders
+          </div>
+        </div>
 
-      <div className="bg-white rounded-xl border border-gray-200">
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b">
-                <th className="text-left py-3 px-4 text-gray-600">Order ID</th>
-                <th className="text-left py-3 px-4 text-gray-600">Customer</th>
-                <th className="text-left py-3 px-4 text-gray-600">Products</th>
-                <th className="text-left py-3 px-4 text-gray-600">Amount</th>
-                <th className="text-left py-3 px-4 text-gray-600">Payment</th>
-                <th className="text-left py-3 px-4 text-gray-600">Status</th>
-                <th className="text-left py-3 px-4 text-gray-600">Date</th>
-                <th className="text-left py-3 px-4 text-gray-600">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {orders.map((o) => (
-                <tr key={o.id} className="border-b hover:bg-gray-50">
-                  <td className="py-3 px-4">{o.id}</td>
-
-                  <td className="py-3 px-4">
-                    <div>
-                      <div>{o.customer}</div>
-                      <div className="text-sm text-gray-500">{o.email}</div>
-                    </div>
-                  </td>
-
-                  <td className="py-3 px-4">{o.items} items</td>
-                  <td className="py-3 px-4">{o.amount}</td>
-                  <td className="py-3 px-4">{o.payment}</td>
-
-                  <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded text-xs ${o.statusColor}`}>
-                      {o.status}
-                    </span>
-                  </td>
-
-                  <td className="py-3 px-4">{o.date}</td>
-
-                  <td className="py-3 px-4">
-                    <button
-                      onClick={() => navigate(`/admin/orders/${o.id}`)}
-                      className="p-1 hover:bg-gray-200 rounded"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </button>
-                  </td>
+        {/* Table */}
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b-2 border-gray-200">
+                <tr>
+                  <th className="text-left py-5 px-6 font-semibold text-gray-700">Order ID</th>
+                  <th className="text-left py-5 px-6 font-semibold text-gray-700">Customer</th>
+                  <th className="text-left py-5 px-6 font-semibold text-gray-700">Items</th>
+                  <th className="text-left py-5 px-6 font-semibold text-gray-700">Amount</th>
+                  <th className="text-left py-5 px-6 font-semibold text-gray-700">Payment</th>
+                  <th className="text-left py-5 px-6 font-semibold text-gray-700">Status</th>
+                  <th className="text-left py-5 px-6 font-semibold text-gray-700">Date</th>
+                  <th className="text-left py-5 px-6 font-semibold text-gray-700">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {orders.length === 0 ? (
+                  <tr>
+                    <td colSpan="8" className="text-center py-12 text-gray-500 text-lg">
+                      No orders found
+                    </td>
+                  </tr>
+                ) : (
+                  orders.map((order) => (
+                    <tr
+                      key={order._id}
+                      className="border-b hover:bg-gray-50 transition cursor-pointer"
+                      onClick={() => navigate(`/admin/orders/${order._id}`)}
+                    >
+                      <td className="py-5 px-6 font-medium text-blue-600">
+                        #{order.orderNumber}
+                      </td>
+
+                      <td className="py-5 px-6">
+                        <div>
+                          <div className="font-medium text-gray-900">
+                            {order.customer?.name || "Unknown User"}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {order.customer?.email || "N/A"}
+                          </div>
+                        </div>
+                      </td>
+
+                      <td className="py-5 px-6 text-gray-700">
+                        {order.itemsCount} items
+                      </td>
+
+                      <td className="py-5 px-6 font-bold text-gray-900">
+                        ₹{parseFloat(order.totalAmount).toFixed(2)}
+                      </td>
+
+                      <td className="py-5 px-6">
+                        <span className="text-gray-700">
+                          {order.paymentMethod || "Unknown"}
+                        </span>
+                      </td>
+
+                      <td className="py-5 px-6">
+                        <span
+                          className={`px-4 py-2 rounded-full text-xs font-semibold ${getStatusColor(
+                            order.status
+                          )}`}
+                        >
+                          {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
+                        </span>
+                      </td>
+
+                      <td className="py-5 px-6 text-gray-600">
+                        {new Date(order.date).toLocaleDateString("en-IN")}
+                      </td>
+
+                      <td className="py-5 px-6">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/admin/orders/${order._id}`);
+                          }}
+                          className="p-3 hover:bg-gray-100 rounded-xl transition"
+                        >
+                          <Eye className="w-5 h-5 text-gray-600" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Summary Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-10">
+          <div className="bg-white p-6 rounded-2xl shadow-lg border border-gray-200">
+            <div className="text-3xl font-bold text-gray-800">{orders.length}</div>
+            <div className="text-gray-600">Total Orders</div>
+          </div>
+          <div className="bg-yellow-50 p-6 rounded-2xl shadow-lg border border-yellow-200">
+            <div className="text-3xl font-bold text-yellow-700">
+              {orders.filter(o => o.status === "pending").length}
+            </div>
+            <div className="text-yellow-700">Pending</div>
+          </div>
+          <div className="bg-blue-50 p-6 rounded-2xl shadow-lg border border-blue-200">
+            <div className="text-3xl font-bold text-blue-700">
+              {orders.filter(o => o.status === "processing").length}
+            </div>
+            <div className="text-blue-700">Processing</div>
+          </div>
+          <div className="bg-green-50 p-6 rounded-2xl shadow-lg border border-green-200">
+            <div className="text-3xl font-bold text-green-700">
+              {orders.filter(o => o.status === "delivered").length}
+            </div>
+            <div className="text-green-700">Delivered</div>
+          </div>
         </div>
       </div>
     </main>
