@@ -3,6 +3,7 @@ import { useCart } from "../context/CartContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
 import { useEffect, useState } from "react";
+import { useSearch } from "../context/SearchContext";
 
 export default function Tray() {
   const {
@@ -14,6 +15,7 @@ export default function Tray() {
   } = useFilter();
 
   const { addItem } = useCart();
+  const { setAllWebsiteProducts } = useSearch();
 
   /* -----------------------------------------
      🔥 EVERY PRODUCT HAS ITS OWN IMAGES
@@ -61,6 +63,7 @@ export default function Tray() {
   useEffect(() => {
     setFilteredProducts(products);
     setAllProducts(products);
+    setAllWebsiteProducts(products);
   }, []);
 
   return (

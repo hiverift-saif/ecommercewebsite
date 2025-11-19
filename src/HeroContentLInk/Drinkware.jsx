@@ -3,6 +3,7 @@ import { useFilter } from "../context/FilterContext";
 import { useCart } from "../context/CartContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
+import { useSearch } from "../context/SearchContext";
 
 export default function Drinkware() {
   const {
@@ -13,6 +14,7 @@ export default function Drinkware() {
     setFilteredProducts,
   } = useFilter();
 
+  const { setAllWebsiteProducts } = useSearch();
   const { addItem } = useCart();
 
   // Drinkware Products
@@ -58,6 +60,7 @@ export default function Drinkware() {
   useEffect(() => {
     setAllProducts(products);
     setFilteredProducts(products);
+    setAllWebsiteProducts(products);
   }, []);
 
   return (

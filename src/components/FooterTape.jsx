@@ -19,7 +19,7 @@ import Logo from "../assets/logo3.png"; // change to your logo path
 
 const FooterTape = () => {
   return (
-    <div className="w-full py-10 border-t border-gray-300 bg-[#f7f3ee] items-center">
+    <div className="w-full py-10 border-t border-gray-300 bg-[#f7f3ee] items-center md:pl-40 text-[#858585]">
       <div className="container mx-auto px-5 grid grid-cols-1 lg:grid-cols-2 gap-10">
 
         {/* LEFT SIDE */}

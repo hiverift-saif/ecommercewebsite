@@ -3,12 +3,14 @@ import { useFilter } from "../context/FilterContext";
 import { useCart } from "../context/CartContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
+import { useSearch } from "../context/SearchContext";
 
 export default function KitchenEssentials() {
   const { isFilterOpen, setIsFilterOpen, setAllProducts, filteredProducts, setFilteredProducts } =
     useFilter();
 
   const { addItem } = useCart();
+  const { setAllWebsiteProducts } = useSearch();
 
   // ⭐ Kitchen Essentials Products
   const products = [
@@ -57,6 +59,7 @@ export default function KitchenEssentials() {
   useEffect(() => {
     setAllProducts(products);
     setFilteredProducts(products);
+    setAllWebsiteProducts(products);
   }, []);
 
   return (

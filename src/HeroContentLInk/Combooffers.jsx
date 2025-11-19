@@ -5,8 +5,12 @@ import { useCart } from "../context/CartContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
 
+import { useSearch } from "../context/SearchContext";
+
+
 export default function Combooffers() {
   const { isFilterOpen, setIsFilterOpen, setAllProducts, filteredProducts, setFilteredProducts } = useFilter();
+  const { setAllWebsiteProducts } = useSearch();
   const { addItem } = useCart();
 
   // ⭐ COMBO PRODUCTS
@@ -56,6 +60,7 @@ export default function Combooffers() {
   useEffect(() => {
     setAllProducts(products);
     setFilteredProducts(products);
+    setAllWebsiteProducts(products);
   }, []);
 
   return (

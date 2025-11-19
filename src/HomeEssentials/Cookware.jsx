@@ -3,11 +3,13 @@ import { useFilter } from "../context/FilterContext";
 import { useCart } from "../context/CartContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
+import { useSearch } from "../context/SearchContext";
+
 
 export default function Cookware() {
   const { isFilterOpen, setIsFilterOpen, setAllProducts, filteredProducts, setFilteredProducts } = useFilter();
   const { addItem } = useCart();
-
+  const { setAllWebsiteProducts } = useSearch();
   // ⭐ COOKWARE PRODUCTS LIST
   const products = [
     {
@@ -55,6 +57,7 @@ export default function Cookware() {
   useEffect(() => {
     setAllProducts(products);
     setFilteredProducts(products);
+    setAllWebsiteProducts(products);
   }, []);
 
   return (

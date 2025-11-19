@@ -26,7 +26,7 @@ const categories = [
   { img: bowls, label: "Bowls", link: "/Bowl" },
   { img: accessories, label: "Accessories", link: "/Womenaccessories" },
   { img: diffuser, label: "Diffusers", link: "/Aromadiffusers" },
-  { img: decor, label: "Decor", link: "/homeDecore" },
+  { img: decor, label: "Decor", link: "/HomeDecore" },
   { img: cupsets, label: "Cup Sets", link: "/CupSets" },
   { img: jars, label: "Jars", link: "/Jars" },
   { img: organizer, label: "Organizers", link: "/Organizer" },

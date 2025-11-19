@@ -3,6 +3,8 @@ import { useCart } from "../context/CartContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
 import { useState, useEffect } from "react";
+import { useSearch } from "../context/SearchContext";
+
 
 export default function Plantersvases() {
   const {      isFilterOpen,
@@ -10,7 +12,11 @@ export default function Plantersvases() {
     setAllProducts,
     filteredProducts,
     setFilteredProducts, } = useFilter();
+
+
+
   const { addItem } = useCart();
+  const { setAllWebsiteProducts } = useSearch();
 
   // PLANETERS & VASES PRODUCTS
   const products = [
@@ -56,6 +62,7 @@ export default function Plantersvases() {
 useEffect(() => {
   setAllProducts(products);        // ⭐ VERY IMPORTANT
   setFilteredProducts(products);   // ⭐ show on load
+   setAllWebsiteProducts(products); 
 }, []);
 
 

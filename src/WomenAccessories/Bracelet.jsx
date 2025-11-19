@@ -5,6 +5,8 @@ import { useCart } from "../context/CartContext";
 
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
+import { useSearch } from "../context/SearchContext";
+
 
 export default function Bracelet() {
   const {
@@ -16,6 +18,7 @@ export default function Bracelet() {
   } = useFilter();
 
   const { addItem } = useCart();
+  const { setAllWebsiteProducts } = useSearch();
 
   // ⭐ PRODUCTS LIST
   const products = [
@@ -64,6 +67,7 @@ export default function Bracelet() {
   useEffect(() => {
     setAllProducts(products);
     setFilteredProducts(products);
+    setAllWebsiteProducts(products);
   }, []);
 
   // ⭐ Image index handling

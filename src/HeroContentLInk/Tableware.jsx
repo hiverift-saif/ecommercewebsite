@@ -3,10 +3,12 @@ import { useFilter } from "../context/FilterContext";
 import { useCart } from "../context/CartContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
+import { useSearch } from "../context/SearchContext";
 
 export default function Tableware() {
   const { isFilterOpen, setIsFilterOpen, setAllProducts, filteredProducts, setFilteredProducts } = useFilter();
   const { addItem } = useCart();
+  const { setAllWebsiteProducts } = useSearch();
 
   // Dummy Tableware Products
   const products = [
@@ -51,6 +53,7 @@ export default function Tableware() {
   useEffect(() => {
     setAllProducts(products);     // store all for filter
     setFilteredProducts(products); // show default
+    setAllWebsiteProducts(products); // store all for search
   }, []);
 
   return (

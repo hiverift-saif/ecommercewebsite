@@ -3,6 +3,7 @@ import { useFilter } from "../context/FilterContext";
 import { useCart } from "../context/CartContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
+import { useSearch } from "../context/SearchContext";
 
 export default function HomeDecore() {
   const {
@@ -12,6 +13,8 @@ export default function HomeDecore() {
     filteredProducts,
     setFilteredProducts,
   } = useFilter();
+
+  const { setAllWebsiteProducts } = useSearch();
 
   const { addItem } = useCart();
 
@@ -59,6 +62,7 @@ export default function HomeDecore() {
   useEffect(() => {
     setAllProducts(products);
     setFilteredProducts(products);
+    setAllWebsiteProducts(products);
   }, []);
 
   return (

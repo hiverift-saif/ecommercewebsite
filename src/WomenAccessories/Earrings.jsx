@@ -5,6 +5,7 @@ import { useCart } from "../context/CartContext";
 
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
+import { useSearch } from "../context/SearchContext";
 
 export default function Earrings() {
   const {
@@ -16,6 +17,7 @@ export default function Earrings() {
   } = useFilter();
 
   const { addItem } = useCart();
+  const { setAllWebsiteProducts } = useSearch();
 
   // ⭐ PRODUCT LIST
   const products = [
@@ -64,6 +66,7 @@ export default function Earrings() {
   useEffect(() => {
     setAllProducts(products);
     setFilteredProducts(products);
+    setAllWebsiteProducts(products);
   }, []);
 
   // ⭐ Image index state

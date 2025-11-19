@@ -3,6 +3,8 @@ import { useCart } from "../context/CartContext";
 import { useFilter } from "../context/FilterContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
+import { useSearch } from "../context/SearchContext";
+
 
 const IMG1 =
   "https://www.earthstore.in/cdn/shop/files/Gold_Harvester_Farmer_3_-_The_Earth_Store_-_-_-2300465_605x.progressive.jpg?v=1724153805";
@@ -18,7 +20,7 @@ const Bowl = () => {
     setFilteredProducts, } =
     useFilter();
   const { addItem } = useCart();
-
+  const { setAllWebsiteProducts } = useSearch();
   // ---- PRODUCTS LIST (Change for every page) ----
   const products = [
     {
@@ -50,6 +52,7 @@ const Bowl = () => {
   useEffect(() => {
     setFilteredProducts(products);
     setAllProducts(products);
+    setAllWebsiteProducts(products);
   }, []);
 
   return (

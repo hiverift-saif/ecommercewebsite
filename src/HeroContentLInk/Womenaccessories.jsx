@@ -4,10 +4,12 @@ import { useCart } from "../context/CartContext";
 
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
+import { useSearch } from "../context/SearchContext";
 
 export default function Womenaccessories() {
   const { isFilterOpen, setIsFilterOpen, setAllProducts, filteredProducts, setFilteredProducts } = useFilter();
   const { addItem } = useCart();
+  const { setAllWebsiteProducts } = useSearch();
 
   // 🔥 WOMEN ACCESSORIES PRODUCTS
   const products = [
@@ -56,6 +58,7 @@ export default function Womenaccessories() {
   useEffect(() => {
     setAllProducts(products);
     setFilteredProducts(products);
+    setAllWebsiteProducts(products);
   }, []);
 
   return (

@@ -288,62 +288,57 @@ const Navbar = ({ onCartOpen }) => {
       </header>
 
       {/* SEARCH POPUP */}
-      {searchOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex justify-center items-start pt-32 z-[200]">
-          <div className="bg-white w-full max-w-xl rounded-lg p-5 shadow-xl">
+{searchOpen && (
+  <div className="fixed inset-0 bg-black/30 flex justify-center items-start pt-20 z-50">
+    <div className="bg-white w-full max-w-lg p-5 rounded-xl shadow-lg">
 
-            {/* CLOSE BUTTON */}
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="text-lg font-medium">Search Products</h2>
-              <button
-                className="text-gray-600"
-                onClick={() => setSearchOpen(false)}
-              >
-                <X size={22} />
-              </button>
+      <div className="flex items-center gap-2 border p-2 rounded-lg">
+        <Search size={20} className="text-gray-600" />
+        <input
+          autoFocus
+          type="text"
+          placeholder="Search products..."
+          className="w-full outline-none"
+          value={searchQuery}
+          onChange={(e) => searchProducts(e.target.value)}
+        />
+        <X
+          size={22}
+          className="cursor-pointer"
+          onClick={() => setSearchOpen(false)}
+        />
+      </div>
+
+      {/* Results */}
+      <div className="mt-4 max-h-80 overflow-y-auto">
+        {searchResults.length === 0 ? (
+          <p className="text-gray-500 text-center py-6">
+            No products found
+          </p>
+        ) : (
+          searchResults.map((p) => (
+<div
+  key={p.id}
+  className="flex items-center gap-3 p-2 border-b cursor-pointer hover:bg-gray-100"
+  onClick={() => {
+    navigate(p.route || "/");  // ⭐ Route pe navigate
+    setSearchOpen(false);      // Popup close
+  }}
+>
+              <img src={p.images[0]} className="w-14 h-14 rounded-lg" />
+              <div>
+                <p className="font-medium">{p.title}</p>
+                <p className="text-sm text-gray-600">₹{p.salePrice}</p>
+              </div>
             </div>
+          ))
+        )}
+      </div>
 
-            {/* INPUT */}
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => {
-                setSearchQuery(e.target.value);
-                searchProducts(e.target.value);
-              }}
-              className="w-full px-3 py-2 border rounded-lg mb-4 outline-none"
-            />
+    </div>
+  </div>
+)}
 
-            {/* RESULTS */}
-            <div className="max-h-80 overflow-y-auto">
-              {searchResults.length === 0 ? (
-                <p className="text-gray-600 text-center py-5">No results found</p>
-              ) : (
-                searchResults.map((p) => (
-                  <div
-                    key={p.id}
-                    onClick={() => {
-                      navigate(`/product/${p.id}`);
-                      setSearchOpen(false);
-                    }}
-                    className="flex items-center gap-4 py-2 px-2 border-b cursor-pointer hover:bg-gray-50"
-                  >
-                    <img
-                      src={p.images?.[0]}
-                      className="w-12 h-12 object-cover rounded"
-                    />
-                    <div>
-                      <p className="font-medium">{p.title}</p>
-                      <p className="text-sm text-gray-600">₹{p.salePrice}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-          </div>
-        </div>
-      )}
     </>
   );
 };

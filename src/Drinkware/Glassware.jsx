@@ -3,6 +3,7 @@ import { useCart } from "../context/CartContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
 import { useEffect, useState } from "react";
+import { useSearch } from "../context/SearchContext";
 
 export default function Glassware() {
   const {
@@ -13,6 +14,7 @@ export default function Glassware() {
     setAllProducts
   } = useFilter();
 
+  const { setAllWebsiteProducts } = useSearch();
   
   const { addItem } = useCart();
 
@@ -57,6 +59,7 @@ export default function Glassware() {
   useEffect(() => {
     setAllProducts(products);        //
     setFilteredProducts(products);
+    setAllWebsiteProducts(products);
   }, []);
 
   return (

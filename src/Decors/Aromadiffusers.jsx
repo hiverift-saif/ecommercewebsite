@@ -3,6 +3,8 @@ import { useCart } from "../context/CartContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
 import { useState, useEffect } from "react";
+import { useSearch } from "../context/SearchContext";
+
 
 export default function Aromadiffusers() {
   const {
@@ -12,6 +14,7 @@ export default function Aromadiffusers() {
     filteredProducts,
     setFilteredProducts
   } = useFilter();
+  const { setAllWebsiteProducts } = useSearch();
 
   const { addItem } = useCart();
 
@@ -65,6 +68,7 @@ export default function Aromadiffusers() {
   useEffect(() => {
     setAllProducts(products);        // master data
     setFilteredProducts(products);   // default show all
+     setAllWebsiteProducts(products); 
   }, []);
 
   return (

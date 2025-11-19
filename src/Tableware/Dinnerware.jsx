@@ -3,6 +3,7 @@ import { useCart } from "../context/CartContext";
 import { useFilter } from "../context/FilterContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
+import { useSearch } from "../context/SearchContext";
 
 // SAME IMAGES (as you wanted)
 const IMG1 =
@@ -18,6 +19,7 @@ const Dinnerware = () => {
     setFilteredProducts,} =
     useFilter();
   const { addItem } = useCart();
+  const { setAllWebsiteProducts } = useSearch();
 
   // ---- DINNERWARE PRODUCTS ----
   const products = [
@@ -51,6 +53,7 @@ const Dinnerware = () => {
   useEffect(() => {
     setFilteredProducts(products);
     setAllProducts(products);
+    setAllWebsiteProducts(products);
   }, []);
 
   return (

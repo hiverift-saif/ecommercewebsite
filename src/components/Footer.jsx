@@ -16,24 +16,24 @@ import {
 // --------------------------------------------------------
 const FOOTER_LINKS = {
   menu: [
-    { label: "Decor", link: "/collections/home-decore" },
-    { label: "Drinkware", link: "/collections/new-drinkware" },
-    { label: "Tableware", link: "/collections/tableware-collections" },
-    { label: "Home Essentials", link: "/collections/home-essentials" },
-    { label: "Sale", link: "/collections/sale" },
-    { label: "Combo", link: "/collections/combo-offers" },
-    { label: "Women Accessories", link: "/collections/womenaccessories" },
+    { label: "Decor", link: "/HomeDecore" },
+    { label: "Drinkware", link: "/Drinkware" },
+    { label: "Tableware", link: "/Tableware" },
+    { label: "Home Essentials", link: "/Homeessentials" },
+    { label: "Sale", link: "/Sales" },
+    { label: "Combo", link: "/Combooffers" },
+    { label: "Women Accessories", link: "/Womenaccessories" },
   ],
 
   support: [
-    { label: "Shipping Policy", link: "/policies/shipping-policy" },
-    { label: "Refund Policy", link: "/policies/refund-policy" },
-    { label: "Privacy", link: "/policies/privacy-policy" },
-    { label: "Terms of Service", link: "/policies/terms-of-service" },
-    { label: "Contact Us", link: "/pages/contact-us-1" },
+    { label: "Shipping Policy", link: "/ShippingPolicy" },
+    { label: "Refund Policy", link: "/RefundPolicy" },
+    { label: "Privacy", link: "/PrivacyPolicy" },
+    { label: "Terms of Service", link: "/TermsOfService" },
+    { label: "Contact Us", link: "/ContactPage" },
     { label: "Track Your Order", link: "https://track.amazon.in/" },
-    { label: "FAQs", link: "https://www.earthstore.in/pages/faqs" },
-    { label: "Blog", link: "/blogs/the-heart-of-the-home" },
+    { label: "FAQs", link: "/FAQPage" },
+    { label: "Blog", link: "/BlogCard" },
   ],
 
   social: [
@@ -50,7 +50,7 @@ const FOOTER_LINKS = {
 // --------------------------------------------------------
 const Footer = () => {
   return (
-<footer className="py-12 bg-[#f7f3ee] flex justify-center items-center">
+<footer className="py-12 bg-[#f7f3ee] flex justify-center items-center md:pl-40 ">
   <div className="w-full max-w-[1440px] mx-auto px-5 
       grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
 

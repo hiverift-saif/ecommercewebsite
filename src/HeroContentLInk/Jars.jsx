@@ -3,6 +3,7 @@ import { useFilter } from "../context/FilterContext";
 import { useCart } from "../context/CartContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
+import { useSearch } from "../context/SearchContext";
 
 export default function Jars() {
   const {
@@ -14,6 +15,7 @@ export default function Jars() {
   } = useFilter();
 
   const { addItem } = useCart();
+  const { setAllWebsiteProducts } = useSearch();
 
   // ⭐ JARS PRODUCTS
   const products = [
@@ -59,6 +61,7 @@ export default function Jars() {
   useEffect(() => {
     setAllProducts(products);
     setFilteredProducts(products);
+    setAllWebsiteProducts(products);
   }, []);
 
   return (

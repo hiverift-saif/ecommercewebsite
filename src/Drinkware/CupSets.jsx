@@ -3,6 +3,7 @@ import { useCart } from "../context/CartContext";
 import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
 import { useEffect, useState } from "react";
+import { useSearch } from "../context/SearchContext";
 
 export default function CupSets() {
   const {
@@ -12,6 +13,7 @@ export default function CupSets() {
     filteredProducts,
     setFilteredProducts,
   } = useFilter();
+  const { setAllWebsiteProducts } = useSearch();
 
   const { addItem } = useCart();
 
@@ -56,6 +58,7 @@ export default function CupSets() {
 useEffect(() => {
   setAllProducts(products);        // ⭐ VERY IMPORTANT
   setFilteredProducts(products);   // ⭐ show on load
+    setAllWebsiteProducts(products);
 }, []);
 
   return (

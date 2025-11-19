@@ -4,6 +4,8 @@ import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
 import ResponsiveImage from "../TableDecorcontent/ResponsiveImage";
 import { useState, useEffect } from "react";
+import { useSearch } from "../context/SearchContext";
+
 import { useCart } from "../context/CartContext";
 
 export default function TableDecor() {
@@ -14,6 +16,9 @@ export default function TableDecor() {
     filteredProducts,
     setFilteredProducts,
   } = useFilter();
+const { setAllWebsiteProducts } = useSearch();
+
+
 
   const { addItem } = useCart();
 
@@ -63,8 +68,15 @@ export default function TableDecor() {
   // ⭐ LOAD PRODUCTS INTO FILTER CONTEXT
   useEffect(() => {
     setAllProducts(products);        // filter ke liye actual products
-    setFilteredProducts(products);   // load hone par dikh jaye
+    setFilteredProducts(products);
+     setAllWebsiteProducts(products);    // load hone par dikh jaye
   }, []);
+
+
+
+
+
+
 
   // 🖼️ tracking image index for each product
   const [imageIndex, setImageIndex] = useState(products.map(() => 0));
