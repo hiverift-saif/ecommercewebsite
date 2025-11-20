@@ -1,4 +1,3 @@
-// src/admin/pages/SubCategories.jsx
 import React, { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2, X, Upload } from "lucide-react";
 import BASE from "../../config";
@@ -11,53 +10,25 @@ export default function SubCategories() {
   const [loading, setLoading] = useState(true);
   const [catLoading, setCatLoading] = useState(true);
 
-  // Modal & Form States
+  // Modal States
   const [modalOpen, setModalOpen] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [currentId, setCurrentId] = useState(null);
 
+  // Form States
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [offer, setOffer] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState(""); // NEW
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [webImage, setWebImage] = useState(null);
   const [appImage, setAppImage] = useState(null);
   const [webPreview, setWebPreview] = useState(null);
   const [appPreview, setAppPreview] = useState(null);
-
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
-  // Fetch Subcategories
-  const fetchSubCategories = async () => {
-    try {
-      setLoading(true);
-      const res = await fetch(`${BASE.BASE_URL}/subcategory/getAllSubCategory`);
-      const data = await res.json();
-
-      if (res.ok && data.result) {
-        const formatted = data.result.map((item) => ({
-          id: item._id,
-          name: item.name,
-          description: item.description || "",
-          price: item.price || 0,
-          offer: item.offer || "",
-          categoryId: item.categoryId,
-          web_image: item.web_image?.[0],
-          app_image: item.app_image?.[0],
-          img: item.web_image?.[0] || item.app_image?.[0] || DEFAULT_IMG,
-        }));
-        setSubCategories(formatted);
-      }
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fetch Categories for Dropdown
+  // Fetch Categories
   const fetchCategories = async () => {
     try {
       setCatLoading(true);
@@ -71,7 +42,7 @@ export default function SubCategories() {
         }));
         setCategories(formatted);
         if (formatted.length > 0) {
-          setSelectedCategory(formatted[0].id); // default first category
+          setSelectedCategory(formatted[0].id);
         }
       }
     } catch (err) {
@@ -81,33 +52,48 @@ export default function SubCategories() {
     }
   };
 
+  // Fetch Subcategories
+  const fetchSubCategories = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${BASE.BASE_URL}/subcategory/getAllSubCategory`);
+      const data = await res.json();
+
+      if (res.ok && data.result) {
+        const formatted = data.result.map((item) => {
+          const cat = categories.find((c) => c.id === item.categoryId);
+          return {
+            id: item._id,
+            name: item.name,
+            description: item.description || "",
+            price: item.price || 0,
+            offer: item.offer || "",
+            categoryId: item.categoryId,
+            categoryName: cat?.name || "Unknown Category", // ⭐ SHOW NAME
+            web_image: item.web_image?.[0],
+            app_image: item.app_image?.[0],
+            img: item.web_image?.[0] || item.app_image?.[0] || DEFAULT_IMG,
+          };
+        });
+        setSubCategories(formatted);
+      }
+    } catch (err) {
+      console.error("Error fetching subcategories", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Load data
   useEffect(() => {
-    fetchSubCategories();
     fetchCategories();
   }, []);
 
-  // Open Add Modal
-  const openAdd = () => {
-    resetForm();
-    setIsEdit(false);
-    setModalOpen(true);
-  };
-
-  // Open Edit Modal
-  const openEdit = (sub) => {
-    setIsEdit(true);
-    setCurrentId(sub.id);
-    setName(sub.name);
-    setDescription(sub.description);
-    setPrice(sub.price);
-    setOffer(sub.offer);
-    setSelectedCategory(sub.categoryId || categories[0]?.id || "");
-    setWebPreview(sub.web_image || DEFAULT_IMG);
-    setAppPreview(sub.app_image || sub.web_image || DEFAULT_IMG);
-    setWebImage(null);
-    setAppImage(null);
-    setModalOpen(true);
-  };
+  useEffect(() => {
+    if (categories.length > 0) {
+      fetchSubCategories();
+    }
+  }, [categories]);
 
   // Reset Form
   const resetForm = () => {
@@ -124,13 +110,34 @@ export default function SubCategories() {
     setCurrentId(null);
   };
 
+  // Open Add
+  const openAdd = () => {
+    resetForm();
+    setIsEdit(false);
+    setModalOpen(true);
+  };
+
+  // Open Edit
+  const openEdit = (sub) => {
+    setIsEdit(true);
+    setCurrentId(sub.id);
+    setName(sub.name);
+    setDescription(sub.description);
+    setPrice(sub.price);
+    setOffer(sub.offer);
+    setSelectedCategory(sub.categoryId);
+    setWebPreview(sub.web_image || DEFAULT_IMG);
+    setAppPreview(sub.app_image || sub.web_image || DEFAULT_IMG);
+    setModalOpen(true);
+  };
+
   // Close Modal
   const closeModal = () => {
     setModalOpen(false);
     resetForm();
   };
 
-  // Handle Image
+  // Image Preview
   const handleImage = (type, file) => {
     if (!file) return;
     if (type === "web") {
@@ -142,7 +149,7 @@ export default function SubCategories() {
     }
   };
 
-  // ADD SUBCATEGORY
+  // ADD
   const handleAdd = async () => {
     if (!name.trim()) return setError("Name is required!");
     if (!selectedCategory) return setError("Please select a category!");
@@ -153,7 +160,7 @@ export default function SubCategories() {
     formData.append("description", description);
     formData.append("price", price || 0);
     formData.append("offer", offer);
-    formData.append("categoryId", selectedCategory); // DYNAMIC CATEGORY
+    formData.append("categoryId", selectedCategory);
     formData.append("userType", "permanent");
     if (webImage) formData.append("web_image", webImage);
     if (appImage) formData.append("app_image", appImage);
@@ -172,28 +179,25 @@ export default function SubCategories() {
         const json = await res.json();
         setError(json.message || "Failed to add");
       }
-    } catch (err) {
+    } catch {
       setError("Network error");
     } finally {
       setSaving(false);
     }
   };
 
-  // EDIT SUBCATEGORY
+  // EDIT
   const handleEdit = async () => {
     if (!name.trim()) return setError("Name is required!");
     if (!selectedCategory) return setError("Please select a category!");
 
     setSaving(true);
-    setError("");
-
     const formData = new FormData();
     formData.append("name", name.trim());
     formData.append("description", description);
     formData.append("price", price || 0);
     formData.append("offer", offer);
-    formData.append("categoryId", selectedCategory); // DYNAMIC
-
+    formData.append("categoryId", selectedCategory);
     if (webImage) formData.append("web_image", webImage);
     if (appImage) formData.append("app_image", appImage);
 
@@ -214,7 +218,7 @@ export default function SubCategories() {
         const json = await res.json();
         setError(json.message || "Update failed");
       }
-    } catch (err) {
+    } catch {
       setError("Network error");
     } finally {
       setSaving(false);
@@ -224,21 +228,21 @@ export default function SubCategories() {
   // DELETE
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this subcategory permanently?")) return;
-
     try {
       const res = await fetch(
         `${BASE.BASE_URL}/subcategory/deleteSubCategory/${id}`,
         { method: "DELETE" }
       );
-
       if (res.ok) {
         setSubCategories((prev) => prev.filter((s) => s.id !== id));
         alert("Deleted successfully!");
       }
-    } catch (err) {
+    } catch {
       alert("Network error");
     }
   };
+
+  // UI STARTS HERE ======================
 
   if (loading) {
     return (
@@ -255,7 +259,9 @@ export default function SubCategories() {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 mb-10">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Subcategories</h1>
-            <p className="text-gray-600 mt-1">Manage laundry & other subcategories</p>
+            <p className="text-gray-600 mt-1">
+              Manage laundry & other subcategories
+            </p>
           </div>
           <button
             onClick={openAdd}
@@ -292,9 +298,24 @@ export default function SubCategories() {
                 </div>
 
                 <div className="px-6 pb-6 text-center">
-                  <h3 className="text-xl font-bold text-gray-900">{sub.name}</h3>
-                  {sub.price > 0 && <p className="text-2xl font-bold text-black mt-2">₹{sub.price}</p>}
-                  <p className="text-gray-500 text-sm mt-1">{sub.description}</p>
+                  <h3 className="text-xl font-bold text-gray-900">
+                    {sub.name}
+                  </h3>
+
+                  {/* ⭐ Category Name Here */}
+                  <p className="text-sm text-gray-500 font-medium mt-1">
+                    Category:{" "}
+                    <span className="text-gray-900">{sub.categoryName}</span>
+                  </p>
+
+                  {sub.price > 0 && (
+                    <p className="text-2xl font-bold text-black mt-2">
+                      ₹{sub.price}
+                    </p>
+                  )}
+                  <p className="text-gray-500 text-sm mt-1">
+                    {sub.description}
+                  </p>
                 </div>
 
                 <div className="px-6 pb-8 flex gap-3">
@@ -319,17 +340,32 @@ export default function SubCategories() {
 
       {/* MODAL */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-y-auto" onClick={closeModal}>
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4 overflow-y-auto"
+          onClick={closeModal}
+        >
+          <div
+            className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[95vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="sticky top-0 bg-white border-b px-6 py-5 flex justify-between items-center">
-              <h2 className="text-2xl font-bold">{isEdit ? "Edit Subcategory" : "Add New Subcategory"}</h2>
-              <button onClick={closeModal} className="p-2 hover:bg-gray-100 rounded-full"><X size={28} /></button>
+              <h2 className="text-2xl font-bold">
+                {isEdit ? "Edit Subcategory" : "Add New Subcategory"}
+              </h2>
+              <button
+                onClick={closeModal}
+                className="p-2 hover:bg-gray-100 rounded-full"
+              >
+                <X size={28} />
+              </button>
             </div>
 
             <div className="p-6 space-y-6">
               {/* Category Dropdown */}
               <div>
-                <label className="block text-lg font-medium mb-2">Select Category *</label>
+                <label className="block text-lg font-medium mb-2">
+                  Select Category *
+                </label>
                 <select
                   value={selectedCategory}
                   onChange={(e) => setSelectedCategory(e.target.value)}
@@ -350,34 +386,124 @@ export default function SubCategories() {
                 </select>
               </div>
 
-              <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Subcategory Name *" className="w-full border border-gray-300 rounded-xl px-5 py-4 text-lg outline-none focus:ring-4 focus:ring-black/10" />
-              <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Description" rows={3} className="w-full border border-gray-300 rounded-xl px-5 py-4 resize-none outline-none focus:ring-4 focus:ring-black/10" />
-              <input type="number" value={price} onChange={(e) => setPrice(e.target.value)} placeholder="Price" className="w-full border border-gray-300 rounded-xl px-5 py-4 outline-none focus:ring-4 focus:ring-black/10" />
-              <input value={offer} onChange={(e) => setOffer(e.target.value)} placeholder="Offer (e.g. 10%)" className="w-full border border-gray-300 rounded-xl px-5 py-4 outline-none focus:ring-4 focus:ring-black/10" />
+              <input
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Subcategory Name *"
+                className="w-full border border-gray-300 rounded-xl px-5 py-4 text-lg outline-none focus:ring-4 focus:ring-black/10"
+              />
+
+              <textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Description"
+                rows={3}
+                className="w-full border border-gray-300 rounded-xl px-5 py-4 resize-none outline-none focus:ring-4 focus:ring-black/10"
+              />
+
+              <input
+                type="number"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                placeholder="Price"
+                className="w-full border border-gray-300 rounded-xl px-5 py-4 outline-none focus:ring-4 focus:ring-black/10"
+              />
+
+              <input
+                value={offer}
+                onChange={(e) => setOffer(e.target.value)}
+                placeholder="Offer (e.g. 10%)"
+                className="w-full border border-gray-300 rounded-xl px-5 py-4 outline-none focus:ring-4 focus:ring-black/10"
+              />
 
               {/* Images */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div>
-                  <label className="block font-bold text-lg mb-3">Web Image</label>
+                  <label className="block font-bold text-lg mb-3">
+                    Web Image
+                  </label>
                   <label className="block border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer hover:border-black transition">
-                    {webPreview ? <img src={webPreview} alt="web" className="mx-auto max-h-64 rounded-lg" /> : <div className="space-y-3"><Upload size={50} className="mx-auto text-gray-400" /><p className="text-gray-600 font-medium">Upload Web Image</p></div>}
-                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImage("web", e.target.files[0])} />
+                    {webPreview ? (
+                      <img
+                        src={webPreview}
+                        alt="web"
+                        className="mx-auto max-h-64 rounded-lg"
+                      />
+                    ) : (
+                      <div className="space-y-3">
+                        <Upload
+                          size={50}
+                          className="mx-auto text-gray-400"
+                        />
+                        <p className="text-gray-600 font-medium">
+                          Upload Web Image
+                        </p>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) =>
+                        handleImage("web", e.target.files[0])
+                      }
+                    />
                   </label>
                 </div>
+
                 <div>
-                  <label className="block font-bold text-lg mb-3">App Image (Optional)</label>
+                  <label className="block font-bold text-lg mb-3">
+                    App Image (Optional)
+                  </label>
                   <label className="block border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer hover:border-black transition">
-                    {appPreview ? <img src={appPreview} alt="app" className="mx-auto max-h-64 rounded-lg" /> : <div className="space-y-3"><Upload size={50} className="mx-auto text-gray-400" /><p className="text-gray-600 font-medium">Upload App Image</p></div>}
-                    <input type="file" accept="image/*" className="hidden" onChange={(e) => handleImage("app", e.target.files[0])} />
+                    {appPreview ? (
+                      <img
+                        src={appPreview}
+                        alt="app"
+                        className="mx-auto max-h-64 rounded-lg"
+                      />
+                    ) : (
+                      <div className="space-y-3">
+                        <Upload
+                          size={50}
+                          className="mx-auto text-gray-400"
+                        />
+                        <p className="text-gray-600 font-medium">
+                          Upload App Image
+                        </p>
+                      </div>
+                    )}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) =>
+                        handleImage("app", e.target.files[0])
+                      }
+                    />
                   </label>
                 </div>
               </div>
 
-              {error && <p className="text-red-600 bg-red-50 py-3 px-5 rounded-lg text-center font-medium">{error}</p>}
+              {error && (
+                <p className="text-red-600 bg-red-50 py-3 px-5 rounded-lg text-center font-medium">
+                  {error}
+                </p>
+              )}
 
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
-                <button onClick={closeModal} disabled={saving} className="px-10 py-4 border-2 border-gray-300 rounded-xl font-bold hover:bg-gray-50">Cancel</button>
-                <button onClick={isEdit ? handleEdit : handleAdd} disabled={saving || catLoading} className="px-12 py-4 bg-black text-white rounded-xl font-bold hover:bg-gray-800 disabled:opacity-60 shadow-lg">
+                <button
+                  onClick={closeModal}
+                  disabled={saving}
+                  className="px-10 py-4 border-2 border-gray-300 rounded-xl font-bold hover:bg-gray-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={isEdit ? handleEdit : handleAdd}
+                  disabled={saving || catLoading}
+                  className="px-12 py-4 bg-black text-white rounded-xl font-bold hover:bg-gray-800 disabled:opacity-60 shadow-lg"
+                >
                   {saving ? "Saving..." : isEdit ? "Update" : "Create"}
                 </button>
               </div>

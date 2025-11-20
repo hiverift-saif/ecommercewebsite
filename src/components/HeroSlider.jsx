@@ -57,7 +57,7 @@ const HeroSlider = () => {
         >
           {slides.map((slide, idx) => (
             <SwiperSlide key={idx}>
-              <a href={slide.link}>
+              <a >
                 
                 {/* Desktop Image */}
                 <img

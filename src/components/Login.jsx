@@ -1,122 +1,200 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
+import BASE from "../config";
 
 export default function Login() {
-  const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const [toast, setToast] = useState(null);
-  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Auto hide toast
+  const [form, setForm] = useState({
+    email: "",
+    password: "",
+  });
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState(null); // { type: "success" | "error", message: "" }
+
   useEffect(() => {
     if (!toast) return;
-    const t = setTimeout(() => setToast(null), 3000);
-    return () => clearTimeout(t);
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
   }, [toast]);
 
-const handleSubmit = (e) => {
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+const handleSubmit = async (e) => {
   e.preventDefault();
 
-  // Validation
-  if (!email) {
-    setError("Email is required");
-    setToast({ type: "error", message: "Please enter your email" });
+  if (!form.email.trim() || !form.password) {
+    setToast({ type: "error", message: "Please enter both email and password" });
     return;
   }
 
-  if (!/\S+@\S+\.\S+/.test(email)) {
-    setError("Enter a valid email");
-    setToast({ type: "error", message: "Invalid email address" });
-    return;
-  }
-
-  setError("");
   setLoading(true);
 
-  // 👉 Save login status
-  setTimeout(() => {
-    localStorage.setItem("userLogged", "true");
-    localStorage.setItem("userEmail", email);
-
-    setLoading(false);
-    setToast({
-      type: "success",
-      message: "Login Successful!",
+  try {
+    const response = await fetch(`${BASE.BASE_URL}/auth/login`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        userEmail: form.email.trim().toLowerCase(),
+        userPassword: form.password,
+      }),
     });
 
-    // 👉 Page reload so Navbar updates
-    setTimeout(() => {
-      window.location.href = "/";
-    }, 800);
-  }, 800);
+    const data = await response.json();
+
+    // Success Case
+    if (response.ok && data.statusCode === 200) {
+      const { access_token } = data.data;
+      const { id, email, role } = data.data.user;
+
+      localStorage.setItem("token", access_token);
+      localStorage.setItem("accessToken", access_token);
+      localStorage.setItem("userId", id);
+      localStorage.setItem("userEmail", email);
+      localStorage.setItem("userRole", role);
+      localStorage.setItem("isLoggedIn", "true");
+
+      setToast({ type: "success", message: "Login Successful! Redirecting..." });
+
+      setTimeout(() => {
+        navigate("/");
+        window.location.reload();
+      }, 1200);
+    } 
+    // Failure Case - Tumhara exact error format
+    else if (data.statusCode === 401 || data.error === "Unauthorized") {
+      setToast({ 
+        type: "error", 
+        message: data.message || "Invalid credentials" 
+      });
+
+      // Optional: Password clear kar do security ke liye
+      setForm(prev => ({ ...prev, password: "" }));
+    }
+    // Any other error
+    else {
+      setToast({ 
+        type: "error", 
+        message: data.message || "Something went wrong. Try again." 
+      });
+    }
+  } catch (err) {
+    console.error("Login failed:", err);
+    setToast({ type: "error", message: "Network error. Please check your connection." });
+  } finally {
+    setLoading(false);
+  }
 };
 
-
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-10">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100 px-4 py-12">
 
-      {/* TOAST */}
+      {/* Toast Notification */}
       {toast && (
         <div
-          className={`fixed top-6 right-6 px-4 py-3 rounded-lg text-white shadow-lg z-50
+          className={`fixed top-6 right-6 z-50 px-6 py-4 rounded-xl shadow-2xl text-white font-semibold text-lg animate-bounce
             ${toast.type === "success" ? "bg-green-600" : "bg-red-600"}`}
         >
           {toast.message}
         </div>
       )}
 
-      <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6 sm:p-8">
-        <h2 className="text-2xl font-bold text-gray-900 text-center">Login</h2>
-        <p className="text-sm text-gray-600 text-center mt-1 mb-6">
-          Enter your email to continue
-        </p>
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-8 border border-gray-100">
 
-        <form onSubmit={handleSubmit}>
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-gray-900">Welcome Back</h2>
+          <p className="text-gray-600 mt-2">Log in to continue shopping</p>
+        </div>
 
-          {/* EMAIL INPUT */}
-          <div className="mb-4">
-            <label className="text-sm font-medium">Email Address</label>
+        <form onSubmit={handleSubmit} className="space-y-6">
+
+          {/* Email Field */}
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Email Address
+            </label>
             <input
               type="email"
-              value={email}
-              onChange={(e) => {
-                setEmail(e.target.value);
-                setError("");
-              }}
-              className={`w-full px-3 py-2 border rounded-md text-sm
-                ${
-                  error
-                    ? "border-red-400 ring-1 ring-red-200"
-                    : "border-gray-300 focus:ring-2 focus:ring-amber-300"
-                }`}
+              name="email"
+              value={form.email}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-100 outline-none transition-all"
               placeholder="you@example.com"
+              autoComplete="email"
+              required
             />
-            {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
           </div>
 
-          {/* LOGIN BUTTON */}
+          {/* Password Field */}
+          <div className="relative">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Password
+            </label>
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              value={form.password}
+              onChange={handleChange}
+              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-amber-500 focus:ring-4 focus:ring-amber-100 outline-none transition-all pr-12"
+              placeholder="Enter your password"
+              autoComplete="current-password"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-11 text-gray-500 hover:text-gray-700"
+            >
+              {showPassword ? <EyeOff size={22} /> : <Eye size={22} />}
+            </button>
+          </div>
+
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={loading}
-            className={`w-full py-2 rounded-md text-white font-medium mt-2 transition
-              ${
-                loading
-                  ? "bg-amber-300 cursor-not-allowed"
-                  : "bg-amber-500 hover:bg-amber-600"
-              }`}
+            className={`w-full py-4 rounded-lg text-white font-bold text-lg transition-all transform duration-200
+              ${loading 
+                ? "bg-amber-400 cursor-not-allowed" 
+                : "bg-amber-500 hover:bg-amber-600 active:scale-98 shadow-xl hover:shadow-2xl"
+              } flex items-center justify-center gap-3`}
           >
-            {loading ? "Logging in..." : "Continue"}
+            {loading ? (
+              <>
+                <div className="w-6 h-6 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                Logging in...
+              </>
+            ) : (
+              "Log In"
+            )}
           </button>
+        </form>
 
-          {/* FOOTER */}
-          <p className="text-center text-sm mt-4 text-gray-600">
-            Don’t have an account?{" "}
-            <Link to="/signup" className="text-amber-600 underline">
-              Sign up
+        <div className="mt-8 text-center">
+          <p className="text-sm text-gray-600">
+            Don't have an account?{" "}
+            <Link 
+              to="/signup" 
+              className="font-bold text-amber-600 hover:text-amber-700 underline underline-offset-4"
+            >
+              Sign up here
             </Link>
           </p>
-        </form>
+        </div>
+
+        {/* Optional: Forgot Password */}
+        <div className="text-center mt-4">
+          <Link to="/forgot-password" className="text-sm text-amber-600 hover:underline">
+            Forgot your password?
+          </Link>
+        </div>
       </div>
     </div>
   );

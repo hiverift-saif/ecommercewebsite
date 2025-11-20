@@ -4,6 +4,8 @@ import SidebarFilter from "../components/Filters/SidebarFilter";
 import FilterHeader from "../components/Filters/FilterHeader";
 import { useEffect, useState } from "react";
 import { useSearch } from "../context/SearchContext";
+  import { Link } from "react-router-dom"; // ⭐ IMPORTANT
+
 
 export default function CupSets() {
   const {
@@ -33,6 +35,7 @@ export default function CupSets() {
       discount: "-40%",
       category: "Cup Sets",
       images: productImages,
+      
     },
     {
       id: 302,

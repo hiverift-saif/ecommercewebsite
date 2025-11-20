@@ -3,8 +3,29 @@ import React, { useState } from "react";
 export default function UserProfile() {
   const userEmail = localStorage.getItem("userEmail") || "guest@example.com";
 
-  // ⭐ Which tab is active
   const [activeTab, setActiveTab] = useState("info");
+
+  // Form States
+  const [profile, setProfile] = useState({
+    name: "",
+    phone: "",
+  });
+
+  const [address, setAddress] = useState({
+    fullName: "",
+    phone: "",
+    pincode: "",
+    state: "",
+    city: "",
+    house: "",
+    area: "",
+  });
+
+  const [passwords, setPasswords] = useState({
+    current: "",
+    newPass: "",
+    confirm: "",
+  });
 
   return (
     <div className="min-h-screen bg-gray-100 px-4 py-8">
@@ -13,64 +34,37 @@ export default function UserProfile() {
         {/* PAGE TITLE */}
         <h1 className="text-3xl font-bold text-gray-800 mb-6">My Profile</h1>
 
-        {/* GRID */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
-          {/* LEFT SIDEBAR */}
+          {/* LEFT MENU */}
           <div className="bg-white shadow p-5 rounded-xl h-fit">
             <h2 className="text-xl font-semibold mb-4">Account</h2>
 
             <ul className="space-y-3 text-gray-700">
-              <li
-                className={`cursor-pointer hover:text-black ${
-                  activeTab === "info" && "font-semibold text-black"
-                }`}
-                onClick={() => setActiveTab("info")}
-              >
-                Personal Info
-              </li>
-
-              <li
-                className={`cursor-pointer hover:text-black ${
-                  activeTab === "address" && "font-semibold text-black"
-                }`}
-                onClick={() => setActiveTab("address")}
-              >
-                Address Book
-              </li>
-
-              <li
-                className={`cursor-pointer hover:text-black ${
-                  activeTab === "orders" && "font-semibold text-black"
-                }`}
-                onClick={() => setActiveTab("orders")}
-              >
-                My Orders
-              </li>
-
-              <li
-                className={`cursor-pointer hover:text-black ${
-                  activeTab === "wishlist" && "font-semibold text-black"
-                }`}
-                onClick={() => setActiveTab("wishlist")}
-              >
-                Wishlist
-              </li>
-
-              <li
-                className={`cursor-pointer hover:text-black ${
-                  activeTab === "security" && "font-semibold text-black"
-                }`}
-                onClick={() => setActiveTab("security")}
-              >
-                Security
-              </li>
+              {["info", "address", "orders", "wishlist", "security"].map((tab) => (
+                <li
+                  key={tab}
+                  className={`cursor-pointer hover:text-black capitalize ${
+                    activeTab === tab && "font-semibold text-black"
+                  }`}
+                  onClick={() => setActiveTab(tab)}
+                >
+                  {tab === "info"
+                    ? "Personal Info"
+                    : tab === "address"
+                    ? "Address Book"
+                    : tab === "orders"
+                    ? "My Orders"
+                    : tab === "wishlist"
+                    ? "Wishlist"
+                    : "Security"}
+                </li>
+              ))}
 
               <li
                 className="cursor-pointer text-red-600"
                 onClick={() => {
-                  localStorage.removeItem("userLogged");
-                  localStorage.removeItem("userEmail");
+                  localStorage.clear();
                   window.location.href = "/";
                 }}
               >
@@ -79,66 +73,147 @@ export default function UserProfile() {
             </ul>
           </div>
 
-          {/* RIGHT SIDE CONTENT */}
+          {/* RIGHT SECTION */}
           <div className="md:col-span-2 space-y-6">
 
-            {/* PERSONAL INFO */}
+            {/* --- PERSONAL INFO FORM --- */}
             {activeTab === "info" && (
               <div className="bg-white shadow p-6 rounded-xl">
-                <h2 className="text-xl font-semibold mb-3">Personal Information</h2>
+                <h2 className="text-xl font-semibold mb-4">Personal Information</h2>
 
-                <div className="text-gray-700 space-y-2">
-                  <p><strong>Email:</strong> {userEmail}</p>
-                  <p><strong>Name:</strong> Not added</p>
-                  <p><strong>Phone:</strong> Not added</p>
+                <div className="space-y-4">
+                  {/* Email */}
+                  <div>
+                    <label className="block font-medium mb-1">Email</label>
+                    <input
+                      type="text"
+                      value={userEmail}
+                      disabled
+                      className="w-full p-3 rounded-lg border bg-gray-100 cursor-not-allowed"
+                    />
+                  </div>
+
+                  {/* Name */}
+                  <div>
+                    <label className="block font-medium mb-1">Full Name</label>
+                    <input
+                      type="text"
+                      value={profile.name}
+                      onChange={(e) =>
+                        setProfile({ ...profile, name: e.target.value })
+                      }
+                      placeholder="Enter your name"
+                      className="w-full p-3 rounded-lg border"
+                    />
+                  </div>
+
+                  {/* Phone */}
+                  <div>
+                    <label className="block font-medium mb-1">Phone Number</label>
+                    <input
+                      type="number"
+                      value={profile.phone}
+                      onChange={(e) =>
+                        setProfile({ ...profile, phone: e.target.value })
+                      }
+                      placeholder="Enter phone"
+                      className="w-full p-3 rounded-lg border"
+                    />
+                  </div>
+
+                  <button className="bg-black text-white px-5 py-3 rounded-lg hover:bg-gray-800 mt-3">
+                    Save Changes
+                  </button>
                 </div>
-
-                <button className="mt-4 bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800">
-                  Edit Profile
-                </button>
               </div>
             )}
 
-            {/* ADDRESS BOOK */}
+            {/* --- ADDRESS FORM --- */}
             {activeTab === "address" && (
               <div className="bg-white shadow p-6 rounded-xl">
-                <h2 className="text-xl font-semibold mb-3">Address Book</h2>
+                <h2 className="text-xl font-semibold mb-4">Add / Edit Address</h2>
 
-                <p className="text-gray-600">No addresses saved yet.</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    ["Full Name", "fullName"],
+                    ["Phone Number", "phone"],
+                    ["Pincode", "pincode"],
+                    ["State", "state"],
+                    ["City", "city"],
+                    ["House No., Building", "house"],
+                    ["Road Name, Area", "area"],
+                  ].map(([label, key]) => (
+                    <div key={key} className="col-span-1">
+                      <label className="block font-medium mb-1">{label}</label>
+                      <input
+                        type="text"
+                        value={address[key]}
+                        onChange={(e) =>
+                          setAddress({ ...address, [key]: e.target.value })
+                        }
+                        placeholder={`Enter ${label}`}
+                        className="w-full p-3 rounded-lg border"
+                      />
+                    </div>
+                  ))}
+                </div>
 
-                <button className="mt-3 bg-amber-600 text-white px-4 py-2 rounded-lg hover:bg-amber-700">
-                  Add New Address
+                <button className="bg-amber-600 text-white px-5 py-3 rounded-lg hover:bg-amber-700 mt-4">
+                  Save Address
                 </button>
               </div>
             )}
 
-            {/* MY ORDERS */}
+            {/* --- ORDERS --- */}
             {activeTab === "orders" && (
               <div className="bg-white shadow p-6 rounded-xl">
-                <h2 className="text-xl font-semibold mb-3">My Orders</h2>
+                <h2 className="text-xl font-semibold mb-4">My Orders</h2>
+
                 <p className="text-gray-600">No orders found.</p>
 
-                <button className="mt-3 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                <button className="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                   Start Shopping
                 </button>
               </div>
             )}
 
-            {/* WISHLIST */}
+            {/* --- WISHLIST --- */}
             {activeTab === "wishlist" && (
               <div className="bg-white shadow p-6 rounded-xl">
-                <h2 className="text-xl font-semibold mb-3">Wishlist</h2>
+                <h2 className="text-xl font-semibold mb-4">Wishlist</h2>
                 <p className="text-gray-600">Your wishlist is empty.</p>
               </div>
             )}
 
-            {/* SECURITY */}
+            {/* --- CHANGE PASSWORD --- */}
             {activeTab === "security" && (
               <div className="bg-white shadow p-6 rounded-xl">
-                <h2 className="text-xl font-semibold mb-3">Security</h2>
-                <button className="bg-gray-900 text-white px-4 py-2 rounded-lg hover:bg-gray-700">
-                  Change Password
-                </button>
+                <h2 className="text-xl font-semibold mb-4">Change Password</h2>
+
+                <div className="space-y-4">
+                  {[
+                    ["Current Password", "current"],
+                    ["New Password", "newPass"],
+                    ["Confirm New Password", "confirm"],
+                  ].map(([label, key]) => (
+                    <div key={key}>
+                      <label className="block font-medium mb-1">{label}</label>
+                      <input
+                        type="password"
+                        value={passwords[key]}
+                        onChange={(e) =>
+                          setPasswords({ ...passwords, [key]: e.target.value })
+                        }
+                        className="w-full p-3 rounded-lg border"
+                        placeholder={label}
+                      />
+                    </div>
+                  ))}
+
+                  <button className="mt-4 bg-gray-900 text-white px-5 py-3 rounded-lg hover:bg-gray-700">
+                    Update Password
+                  </button>
+                </div>
               </div>
             )}
 

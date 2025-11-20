@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { Routes, Route, Outlet } from "react-router-dom";
 
+
 import Navbar from "./components/Navbar";
 import CartDrawer from "./components/CartDrawer";
 import Home from "./components/Home";
@@ -62,6 +63,7 @@ import Login from "./components/Login";
 import MyOrder from "./Profile/MyOrder";
 import UserProfile from "./Profile/UserProfile";
 
+
 // CONTEXTS  
 import { FilterProvider } from "./context/FilterContext";
 import { SearchProvider } from "./context/SearchContext";
@@ -73,6 +75,7 @@ import ContactPage from "./components/ContactPage";
 import FAQPage from "./components/FAQPage";
 import BlogCard from "./components/BlogCard";
 import ProductDetails from "./components/ProductDetails";
+import UserOrderDetails from "./Profile/UserOrderDetails";
 
 // Layout
 function MainLayout({ cartOpen, onCartOpen, onCartClose }) {
@@ -168,6 +171,9 @@ export default function App() {
             <Route path="/FAQPage" element={<FAQPage />} />
             <Route path="/BlogCard" element={<BlogCard />} />
             <Route path="/product/:id" element={<ProductDetails />} />
+           <Route path="/UserOrderDetails" element={<UserOrderDetails />} />
+
+
 
 
           </Route>

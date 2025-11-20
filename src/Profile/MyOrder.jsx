@@ -1,4 +1,5 @@
 import React from "react";
+import { Link } from "react-router-dom";
 
 export default function MyOrder() {
   // Example dummy orders (API aayega tab replace kar dena)
@@ -95,9 +96,11 @@ export default function MyOrder() {
                   </p>
 
                   <div className="flex gap-3 mt-3">
-                    <button className="px-4 py-2 text-xs border rounded-lg hover:bg-gray-100 transition">
-                      View Details
-                    </button>
+                    <Link to="/UserOrderDetails"> 
+                      <button className="px-4 py-2 text-xs border rounded-lg hover:bg-gray-100 transition">
+                        View Details
+                      </button>
+                    </Link>
 
                     <button className="px-4 py-2 text-xs border rounded-lg hover:bg-gray-100 transition">
                       Download Invoice

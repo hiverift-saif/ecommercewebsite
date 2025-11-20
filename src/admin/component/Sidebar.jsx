@@ -43,7 +43,7 @@ export default function Sidebar({ mobileOpen, setMobileOpen }) {
           <SidebarLink to="/admin/customers" icon={<Users />} label="Customers" onClick={setMobileOpen} />
           <SidebarLink to="/admin/coupons" icon={<Percent />} label="Coupons" onClick={setMobileOpen} />
           <SidebarLink to="/admin/banners" icon={<RectangleHorizontal  />} label="Banners" onClick={setMobileOpen} />
-          <SidebarLink to="/admin/WebsiteSettings" icon={<Settings  />} label="Website Settings" onClick={setMobileOpen} />
+          {/* <SidebarLink to="/admin/WebsiteSettings" icon={<Settings  />} label="Website Settings" onClick={setMobileOpen} /> */}
           <SidebarLink to="/admin/profile" icon={<User />} label="Profile" onClick={setMobileOpen} />
 
 

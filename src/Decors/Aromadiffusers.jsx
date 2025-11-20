@@ -69,7 +69,7 @@ export default function Aromadiffusers() {
   useEffect(() => {
     setAllProducts(products);
     setFilteredProducts(products);
-    setAllWebsiteProducts(products);   // 🎯 IMPORTANT
+    setAllWebsiteProducts(prev => [...prev, ...products]);
   }, []);
 
   return (
