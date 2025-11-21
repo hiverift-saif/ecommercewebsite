@@ -1,98 +1,155 @@
-import React, { useState } from "react";
-import { SquarePen, Trash2, Plus, Upload, X } from "lucide-react";
+// src/admin/pages/Banners.jsx → FULLY WORKING (GET + POST API + Image Upload)
+
+import React, { useState, useEffect } from "react";
+import { Plus, SquarePen, Trash2, X } from "lucide-react";
+import BASE from "../../config";
+
+const DEFAULT_BANNER = "https://via.placeholder.com/1920x600.png?text=No+Image";
 
 export default function Banners() {
+  const [banners, setBanners] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  // Modal States
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
 
+  // Add Form
   const [form, setForm] = useState({
     title: "",
     type: "",
-    link: "",
-    status: "Active",
+    linkUrl: "",
+    status: "active",
     image: null,
   });
 
+  // Edit Form
   const [editForm, setEditForm] = useState({
+    id: "",
     title: "",
     type: "",
-    link: "",
-    status: "Active",
+    linkUrl: "",
+    status: "active",
     image: null,
+    oldImage: "",
   });
 
-  // Dummy banners
-  const [banners, setBanners] = useState([
-    {
-      id: 1,
-      title: "Summer Sale - 30% Off",
-      type: "Homepage Hero",
-      status: "Active",
-      img: "/banner-placeholder.jpg",
-    },
-    {
-      id: 2,
-      title: "New Dinner Set Collection",
-      type: "Homepage Banner",
-      status: "Active",
-      img: "/banner-placeholder.jpg",
-    },
-  ]);
+  const token = localStorage.getItem("token") || localStorage.getItem("accessToken");
 
-  // ADD BANNER
-  const handleAdd = () => {
-    if (!form.title || !form.type) {
-      alert("Please fill all required fields!");
-      return;
+  // FETCH ALL BANNERS
+  const fetchBanners = async () => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${BASE.BASE_URL}/banner/getAllBanner`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+
+      if (res.ok && data.result) {
+        const formatted = data.result.map((b) => ({
+          id: b._id,
+          title: b.title || "Untitled",
+          type: b.type || "Unknown",
+          link: b.linkUrl || "#",
+          status: b.status || (b.is_published ? "active" : "inactive"),
+          img: b.image || b.web_image?.[0] || b.app_image?.[0] || DEFAULT_BANNER,
+        }));
+        setBanners(formatted);
+      } else {
+        setBanners([]);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load banners");
+      setBanners([]);
+    } finally {
+      setLoading(false);
     }
-
-    setBanners([
-      ...banners,
-      {
-        id: Date.now(),
-        title: form.title,
-        type: form.type,
-        link: form.link,
-        status: form.status,
-        img: form.image ? URL.createObjectURL(form.image) : "/banner-placeholder.jpg",
-      },
-    ]);
-
-    setShowAddModal(false);
-    setForm({
-      title: "",
-      type: "",
-      link: "",
-      status: "Active",
-      image: null,
-    });
-
-    alert("Banner added successfully!");
   };
 
-  // EDIT BANNER LOAD
-  const openEdit = (b) => {
+  useEffect(() => {
+    fetchBanners();
+  }, []);
+
+  // ADD BANNER - FULLY WORKING POST API
+  const handleAdd = async () => {
+    if (!form.title.trim()) return alert("Title is required!");
+    if (!form.image) return alert("Please select an image!");
+
+    setSaving(true);
+    const formData = new FormData();
+    formData.append("title", form.title.trim());
+    formData.append("type", form.type || "General");
+    if (form.linkUrl) formData.append("linkUrl", form.linkUrl);
+    formData.append("status", form.status);
+    formData.append("image", form.image);
+
+    try {
+      const res = await fetch(`${BASE.BASE_URL}/banner/createBanner`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
+
+      const result = await res.json();
+
+      if (res.ok && result.statusCode === 201) {
+        alert("Banner created successfully!");
+        setShowAddModal(false);
+        setForm({ title: "", type: "", linkUrl: "", status: "active", image: null });
+        fetchBanners(); // Refresh list
+      } else {
+        alert(result.message || "Failed to create banner");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Network error. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  // Open Edit Modal
+  const openEdit = (banner) => {
     setEditForm({
-      title: b.title,
-      type: b.type,
-      link: b.link,
-      status: b.status,
+      id: banner.id,
+      title: banner.title,
+      type: banner.type,
+      linkUrl: banner.link,
+      status: banner.status,
       image: null,
-      oldImage: b.img
+      oldImage: banner.img,
     });
     setShowEditModal(true);
   };
 
-  // SAVE UPDATE
+  // Placeholder for future
   const handleUpdate = () => {
-    if (!editForm.title || !editForm.type) {
-      alert("Please fill all required fields!");
-      return;
-    }
-
-    alert("Banner updated!");
+    alert("Edit API coming soon!");
     setShowEditModal(false);
   };
+
+  const handleDelete = (id) => {
+    if (window.confirm("Delete this banner permanently?")) {
+      alert("Delete API coming soon!");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-center">
+          <div className="w-16 h-16 border-8 border-black border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-6 text-2xl font-bold text-gray-700">Loading Banners...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <main className="flex-1 overflow-y-auto p-6">
@@ -114,265 +171,146 @@ export default function Banners() {
 
         {/* BANNER GRID */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {banners.map((b) => (
-            <div key={b.id} className="bg-white rounded-xl border">
-              <img
-                src={b.img}
-                className="w-full h-48 object-cover rounded-t-lg"
-              />
-
-              <div className="p-6 space-y-3">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3>{b.title}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{b.type}</p>
+          {banners.length === 0 ? (
+            <div className="col-span-2 text-center py-20 text-gray-500">
+              <p className="text-xl">No banners found</p>
+              <button onClick={() => setShowAddModal(true)} className="mt-4 text-blue-600 underline">
+                Add your first banner
+              </button>
+            </div>
+          ) : (
+            banners.map((b) => (
+              <div key={b.id} className="bg-white rounded-xl border overflow-hidden">
+                <img
+                  src={b.img}
+                  alt={b.title}
+                  className="w-full h-48 object-cover"
+                  onError={(e) => (e.target.src = DEFAULT_BANNER)}
+                />
+                <div className="p-6 space-y-3">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="font-semibold text-lg">{b.title}</h3>
+                      <p className="text-sm text-gray-600 mt-1">{b.type}</p>
+                    </div>
+                    <span className={`text-xs px-2 py-0.5 rounded ${b.status === "active" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}`}>
+                      {b.status === "active" ? "Active" : "Inactive"}
+                    </span>
                   </div>
-
-                  <span className="text-xs px-2 py-0.5 rounded bg-green-100 text-green-700">
-                    {b.status}
-                  </span>
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => openEdit(b)}
-                    className="border px-3 py-2 rounded flex items-center gap-2 text-sm w-full"
-                  >
-                    <SquarePen className="w-4 h-4" /> Edit
-                  </button>
-
-                  <button className="border px-3 py-2 rounded flex items-center gap-2 text-sm w-full">
-                    <Trash2 className="w-4 h-4 text-red-500" /> Delete
-                  </button>
+                  <div className="flex gap-2">
+                    <button onClick={() => openEdit(b)} className="border px-3 py-2 rounded flex items-center gap-2 text-sm w-full justify-center hover:bg-gray-50">
+                      <SquarePen className="w-4 h-4" /> Edit
+                    </button>
+                    <button onClick={() => handleDelete(b.id)} className="border border-red-300 text-red-600 px-3 py-2 rounded flex items-center gap-2 text-sm w-full justify-center hover:bg-red-50">
+                      <Trash2 className="w-4 h-4" /> Delete
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
 
-
-      {/* ─────────────────────────────────────────────── */}
-      {/* ADD BANNER MODAL */}
-      {/* ─────────────────────────────────────────────── */}
+      {/* ADD BANNER MODAL - FULLY WORKING */}
       {showAddModal && (
         <>
-          <div className="fixed inset-0 bg-black/40 z-40" />
+          <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setShowAddModal(false)} />
           <div className="fixed top-1/2 left-1/2 z-50 bg-white p-6 rounded-lg shadow-lg w-full max-w-lg -translate-x-1/2 -translate-y-1/2">
-
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Add New Banner</h2>
-              <button onClick={() => setShowAddModal(false)}>
+              <button onClick={() => setShowAddModal(false)} className="hover:bg-gray-100 rounded-full p-1">
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             <div className="space-y-4">
-
-              {/* Title */}
               <div>
-                <label className="text-sm">Banner Title</label>
+                <label className="text-sm font-medium">Banner Title *</label>
                 <input
+                  placeholder="e.g. Summer Sale 50% Off"
                   className="border w-full rounded px-3 py-2 mt-1"
-                  placeholder="e.g., Summer Sale - 30% Off"
                   value={form.title}
                   onChange={(e) => setForm({ ...form, title: e.target.value })}
                 />
               </div>
 
-              {/* Type */}
               <div>
-                <label className="text-sm">Banner Type</label>
+                <label className="text-sm font-medium">Banner Type</label>
                 <input
+                  placeholder="e.g. Homepage Hero"
                   className="border w-full rounded px-3 py-2 mt-1"
-                  placeholder="Homepage Hero"
                   value={form.type}
                   onChange={(e) => setForm({ ...form, type: e.target.value })}
                 />
               </div>
 
-              {/* Link */}
               <div>
-                <label className="text-sm">Link URL</label>
+                <label className="text-sm font-medium">Link URL (optional)</label>
                 <input
+                  placeholder="https://example.com/offer"
                   className="border w-full rounded px-3 py-2 mt-1"
-                  placeholder="/sale"
-                  value={form.link}
-                  onChange={(e) => setForm({ ...form, link: e.target.value })}
+                  value={form.linkUrl}
+                  onChange={(e) => setForm({ ...form, linkUrl: e.target.value })}
                 />
               </div>
 
-              {/* Status */}
               <div>
-                <label className="text-sm">Status</label>
+                <label className="text-sm font-medium">Status</label>
                 <select
                   className="border w-full rounded px-3 py-2 mt-1"
                   value={form.status}
                   onChange={(e) => setForm({ ...form, status: e.target.value })}
                 >
-                  <option>Active</option>
-                  <option>Inactive</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
                 </select>
               </div>
 
-              {/* Image Upload */}
               <div>
-                <label className="text-sm">Banner Image</label>
-
+                <label className="text-sm font-medium">Banner Image *</label>
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <img
-                    src={
-                      form.image
-                        ? URL.createObjectURL(form.image)
-                        : "/banner-placeholder.jpg"
-                    }
-                    className="w-full h-40 object-cover rounded mb-3"
-                  />
-
-                  <p className="text-xs text-gray-500">Recommended: 1920x600px</p>
-
+                  {form.image ? (
+                    <img src={URL.createObjectURL(form.image)} alt="preview" className="w-full h-40 object-cover rounded mb-3" />
+                  ) : (
+                    <p className="text-gray-500">Click to upload image</p>
+                  )}
                   <input
                     type="file"
-                    className="mt-2"
                     accept="image/*"
-                    onChange={(e) =>
-                      setForm({ ...form, image: e.target.files[0] })
-                    }
+                    className="mt-3 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:bg-black file:text-white hover:file:bg-gray-800"
+                    onChange={(e) => setForm({ ...form, image: e.target.files[0] })}
                   />
+                  <p className="text-xs text-gray-500 mt-2">Recommended: 1920x600px</p>
                 </div>
               </div>
             </div>
 
             <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="border px-4 py-2 rounded"
-              >
+              <button onClick={() => setShowAddModal(false)} className="border px-4 py-2 rounded">
                 Cancel
               </button>
-
               <button
                 onClick={handleAdd}
-                className="bg-black text-white px-4 py-2 rounded"
+                disabled={saving}
+                className="bg-black text-white px-6 py-2 rounded disabled:opacity-60"
               >
-                Add Banner
+                {saving ? "Creating..." : "Create Banner"}
               </button>
             </div>
           </div>
         </>
       )}
 
-
-      {/* ─────────────────────────────────────────────── */}
-      {/* EDIT BANNER MODAL */}
-      {/* ─────────────────────────────────────────────── */}
+      {/* EDIT MODAL (Future use) */}
       {showEditModal && (
         <>
-          <div className="fixed inset-0 bg-black/40 z-40" />
+          <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setShowEditModal(false)} />
           <div className="fixed top-1/2 left-1/2 z-50 bg-white p-6 rounded-lg shadow-lg w-full max-w-lg -translate-x-1/2 -translate-y-1/2">
-
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-lg font-semibold">Edit Banner</h2>
-              <button onClick={() => setShowEditModal(false)}>
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-
-              {/* Title */}
-              <div>
-                <label className="text-sm">Banner Title</label>
-                <input
-                  className="border w-full rounded px-3 py-2 mt-1"
-                  value={editForm.title}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, title: e.target.value })
-                  }
-                />
-              </div>
-
-              {/* Type */}
-              <div>
-                <label className="text-sm">Banner Type</label>
-                <input
-                  className="border w-full rounded px-3 py-2 mt-1"
-                  value={editForm.type}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, type: e.target.value })
-                  }
-                />
-              </div>
-
-              {/* Link */}
-              <div>
-                <label className="text-sm">Link URL</label>
-                <input
-                  className="border w-full rounded px-3 py-2 mt-1"
-                  value={editForm.link}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, link: e.target.value })
-                  }
-                />
-              </div>
-
-              {/* Status */}
-              <div>
-                <label className="text-sm">Status</label>
-                <select
-                  className="border w-full rounded px-3 py-2 mt-1"
-                  value={editForm.status}
-                  onChange={(e) =>
-                    setEditForm({ ...editForm, status: e.target.value })
-                  }
-                >
-                  <option>Active</option>
-                  <option>Inactive</option>
-                </select>
-              </div>
-
-              {/* Image */}
-              <div>
-                <label className="text-sm">Banner Image</label>
-
-                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-                  <img
-                    src={
-                      editForm.image
-                        ? URL.createObjectURL(editForm.image)
-                        : editForm.oldImage || "/banner-placeholder.jpg"
-                    }
-                    className="w-full h-40 object-cover rounded mb-3"
-                  />
-
-                  <input
-                    type="file"
-                    className="mt-2"
-                    accept="image/*"
-                    onChange={(e) =>
-                      setEditForm({ ...editForm, image: e.target.files[0] })
-                    }
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-3 mt-6">
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="border px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
-
-              <button
-                onClick={handleUpdate}
-                className="bg-black text-white px-4 py-2 rounded"
-              >
-                Update Banner
-              </button>
-            </div>
-
+            <h2 className="text-lg font-semibold mb-4">Edit Banner (Coming Soon)</h2>
+            <button onClick={() => setShowEditModal(false)} className="bg-black text-white px-6 py-2 rounded">
+              Close
+            </button>
           </div>
         </>
       )}

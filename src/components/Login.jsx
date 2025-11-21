@@ -87,7 +87,7 @@ const handleSubmit = async (e) => {
     }
   } catch (err) {
     console.error("Login failed:", err);
-    setToast({ type: "error", message: "Network error. Please check your connection." });
+    setToast({ type: "error", message: " Something went wrong!" });
   } finally {
     setLoading(false);
   }

@@ -168,15 +168,18 @@ export default function SidebarFilter({ isOpen, onClose }) {
         />
       )}
 
-      <aside
-        className={`fixed top-0 left-0 h-full bg-white shadow-xl z-50 w-full max-w-xs p-5 
-          transition-all duration-500 ease-[cubic-bezier(.25,.8,.25,1)]
-          ${
-            isOpen
-              ? "translate-x-0 opacity-100"
-              : "-translate-x-full opacity-0"
-          }`}
-      >
+<aside
+  className={`fixed top-0 left-0 h-full bg-white shadow-xl z-50 w-full max-w-xs p-5 
+    overflow-y-auto               /* 🔥 Scroll Fix */
+    transition-all duration-500 ease-[cubic-bezier(.25,.8,.25,1)]
+    ${
+      isOpen
+        ? "translate-x-0 opacity-100"
+        : "-translate-x-full opacity-0"
+    }`}
+>
+
+      
         <div className="flex justify-between mb-5">
           <h2 className="text-lg font-semibold">Filters</h2>
           <button

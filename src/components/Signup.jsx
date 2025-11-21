@@ -103,7 +103,7 @@ export default function Signup() {
       }
     } catch (err) {
       console.error("Registration error:", err);
-      setToast({ type: "error", message: "Network error. Please check your connection." });
+      setToast({ type: "error", message: "Something went wrong!." });
     } finally {
       setSubmitting(false);
     }
