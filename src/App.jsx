@@ -37,7 +37,7 @@ import Mugs from "./Drinkware/Mugs";
 import Tray from "./Tableware/Tray";
 import Bowl from "./Tableware/Bowl";
 import Dinnerware from "./Tableware/Dinnerware";
-import MultipurposeJar from "./Tableware/multipurposeJar";
+import MultipurposeJar from "./Tableware/MultipurposeJar";
 import DipsPlate from "./Tableware/DipsPlate";
 
 import KitchenEssentials from "./HomeEssentials/KitchenEssentials";
