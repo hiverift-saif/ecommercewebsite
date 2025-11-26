@@ -78,6 +78,7 @@ import FAQPage from "./components/FAQPage";
 import BlogCard from "./components/BlogCard";
 import ProductDetails from "./components/ProductDetails";
 import UserOrderDetails from "./Profile/UserOrderDetails";
+import ReturnReplace from "./components/ReturnReplace";
 
 // Layout
 function MainLayout({ cartOpen, onCartOpen, onCartClose }) {
@@ -174,6 +175,8 @@ export default function App() {
             <Route path="/BlogCard" element={<BlogCard />} />
             <Route path="/product/:id" element={<ProductDetails />} />
            <Route path="/UserOrderDetails" element={<UserOrderDetails />} />
+           <Route path="/ReturnReplace" element={<ReturnReplace />} />
+
 
 
 

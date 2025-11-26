@@ -28,23 +28,23 @@ export default function UserProfile() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-100 px-4 py-8">
+    <div className="min-h-screen  px-4 py-8 bg-[#f7f3ee]">
       <div className="max-w-5xl mx-auto">
 
         {/* PAGE TITLE */}
-        <h1 className="text-3xl font-bold text-gray-800 mb-6">My Profile</h1>
+        <h1 className="text-3xl font-bold text-[#9c7d50]  mb-6">My Profile</h1>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
 
           {/* LEFT MENU */}
-          <div className="bg-white shadow p-5 rounded-xl h-fit">
-            <h2 className="text-xl font-semibold mb-4">Account</h2>
+          <div className="bg-[#f7f3ee] shadow p-5 rounded-xl h-fit">
+            <h2 className="text-xl font-semibold mb-4  text-[#9c7d50] ">Account</h2>
 
             <ul className="space-y-3 text-gray-700">
               {["info", "address", "orders", "wishlist", "security"].map((tab) => (
                 <li
                   key={tab}
-                  className={`cursor-pointer hover:text-black capitalize ${
+                  className={`cursor-pointer  text-[#9c7d50] capitalize ${
                     activeTab === tab && "font-semibold text-black"
                   }`}
                   onClick={() => setActiveTab(tab)}

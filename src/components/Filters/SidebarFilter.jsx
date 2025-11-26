@@ -10,41 +10,6 @@ import {
   CheckIcon,
 } from "@heroicons/react/24/outline";
 import { useFilter } from "../../context/FilterContext";
-import { useNavigate } from "react-router-dom";
-
-const routeMap = {
-  "Table Decor": "/TableDecor",
-  "Aroma Diffusers": "/Aromadiffusers",
-  "Vases & Planters": "/Plantersvases",
-
-  "Glassware": "/Glassware",
-  "Cup Sets": "/CupSets",
-  "Mugs": "/Mugs",
-
-  "Serving Trays": "/Tray",
-  "Bowls & Soup Sets": "/Bowl",
-  "Dinnerware": "/Dinnerware",
-  "Jars": "/MultipurposeJar",
-  "Platters & Dips": "/DipsPlate",
-
-  "Cookware": "/Cookware",
-  "Kitchen": "/KitchenEssentials",
-  "Storage & Organisers": "/Organizer",
-
-  "Mug Set": "/MugSet",
-
-  "Pendant": "/Pendants",
-  "Earrings": "/Earrings",
-  "Bracelet": "/Bracelet",
-
-  "Decor": "/TableDecor",
-  "Drinkware": "/Glassware",
-  "Tableware": "/Dinnerware",
-  "Home Essentials": "/KitchenEssentials",
-  "Sale": "/Sales",
-  "Combo": "/MugSet",
-  "Women Accessories": "/Pendants",
-};
 
 export default function SidebarFilter({ isOpen, onClose }) {
   const [selected, setSelected] = useState([]);
@@ -52,7 +17,6 @@ export default function SidebarFilter({ isOpen, onClose }) {
   const [inStock, setInStock] = useState(false);
 
   const { allProducts, setFilteredProducts } = useFilter();
-  const navigate = useNavigate();
 
   useEffect(() => {
     document.body.style.overflow = isOpen ? "hidden" : "auto";
@@ -66,17 +30,20 @@ export default function SidebarFilter({ isOpen, onClose }) {
     );
   };
 
+  // ⭐ FIXED FILTER — multiple checkbox → multiple products UI pe ek sath
   const applyFilter = () => {
     let filtered = [...allProducts];
 
     if (selected.length > 0) {
-      filtered = filtered.filter((p) =>
-        selected.some((label) =>
-          String(p.category || p.subcategory || "")
-            .toLowerCase()
-            .includes(label.toLowerCase())
-        )
-      );
+      filtered = filtered.filter((p) => {
+        const cat = (p.category || "").toLowerCase();
+        const sub = (p.subcategory || "").toLowerCase();
+
+        return selected.some((label) => {
+          const l = label.toLowerCase();
+          return cat === l || sub === l;
+        });
+      });
     }
 
     filtered = filtered.filter(
@@ -90,13 +57,6 @@ export default function SidebarFilter({ isOpen, onClose }) {
     }
 
     setFilteredProducts(filtered);
-
-    if (selected.length > 0) {
-      const last = selected[selected.length - 1];
-      const route = routeMap[last];
-      if (route) navigate(route);
-    }
-
     onClose();
   };
 
@@ -107,10 +67,9 @@ export default function SidebarFilter({ isOpen, onClose }) {
     setFilteredProducts(allProducts);
   };
 
+  // ⭐ CheckRow — no re-mount, no collapsing
   const CheckRow = ({ label }) => (
-    <label
-      className="flex items-center gap-2 text-sm cursor-pointer transition-all duration-200 hover:translate-x-1"
-    >
+    <label className="flex items-center gap-2 text-sm cursor-pointer transition-all">
       <input
         type="checkbox"
         className="sr-only"
@@ -119,14 +78,14 @@ export default function SidebarFilter({ isOpen, onClose }) {
       />
 
       <span
-        className={`h-5 w-5 border flex items-center justify-center rounded transition-all duration-300 ${
+        className={`h-5 w-5 border flex items-center justify-center rounded transition-all duration-200 ${
           selected.includes(label)
             ? "border-blue-600 bg-blue-50 scale-110"
             : "border-gray-400"
         }`}
       >
         {selected.includes(label) && (
-          <CheckIcon className="h-4 w-4 text-blue-700 transition-all duration-300" />
+          <CheckIcon className="h-4 w-4 text-blue-700" />
         )}
       </span>
 
@@ -134,24 +93,21 @@ export default function SidebarFilter({ isOpen, onClose }) {
     </label>
   );
 
+  // ⭐ Section — fixed. No closing on checkbox click.
   const Section = ({ title, children }) => (
     <Disclosure defaultOpen>
       {({ open }) => (
         <div className="border-b pb-4">
-          <Disclosure.Button
-            className="flex justify-between w-full font-medium py-2 transition-all duration-300 hover:bg-gray-100 rounded"
-          >
+          <Disclosure.Button className="flex justify-between w-full font-medium py-2 hover:bg-gray-100 rounded">
             {title}
             <ChevronDownIcon
-              className={`h-5 transition-all duration-300 ${
+              className={`h-5 transition-transform duration-300 ${
                 open ? "rotate-180" : ""
               }`}
             />
           </Disclosure.Button>
 
-          <Disclosure.Panel
-            className="mt-2 space-y-2 animate-[fadeIn_0.3s_ease]"
-          >
+          <Disclosure.Panel className="mt-2 space-y-2">
             {children}
           </Disclosure.Panel>
         </div>
@@ -163,29 +119,24 @@ export default function SidebarFilter({ isOpen, onClose }) {
     <>
       {isOpen && (
         <div
-          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-all duration-500"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
           onClick={onClose}
         />
       )}
 
-<aside
-  className={`fixed top-0 left-0 h-full bg-white shadow-xl z-50 w-full max-w-xs p-5 
-    overflow-y-auto               /* 🔥 Scroll Fix */
-    transition-all duration-500 ease-[cubic-bezier(.25,.8,.25,1)]
-    ${
-      isOpen
-        ? "translate-x-0 opacity-100"
-        : "-translate-x-full opacity-0"
-    }`}
->
-
-      
+      <aside
+        className={`fixed top-0 left-0 h-full bg-white shadow-xl z-50 w-full max-w-xs p-5 
+          overflow-y-auto
+          transition-all duration-500
+          ${
+            isOpen
+              ? "translate-x-0 opacity-100"
+              : "-translate-x-full opacity-0"
+          }`}
+      >
         <div className="flex justify-between mb-5">
           <h2 className="text-lg font-semibold">Filters</h2>
-          <button
-            className="transition-all duration-200 hover:rotate-90"
-            onClick={onClose}
-          >
+          <button className="hover:rotate-90" onClick={onClose}>
             <XMarkIcon className="h-6 w-6" />
           </button>
         </div>
@@ -193,21 +144,20 @@ export default function SidebarFilter({ isOpen, onClose }) {
         <div className="flex gap-3 mb-4">
           <button
             onClick={resetFilter}
-            className="px-4 py-2 border rounded transition-all duration-300 hover:bg-gray-100"
+            className="px-4 py-2 border rounded hover:bg-gray-100"
           >
             Reset
           </button>
 
           <button
             onClick={applyFilter}
-            className="px-4 py-2 text-white bg-blue-600 rounded 
-              transition-all duration-300 hover:bg-blue-700 active:scale-95"
+            className="px-4 py-2 text-white bg-blue-600 rounded hover:bg-blue-700 active:scale-95"
           >
             Apply
           </button>
         </div>
 
-        {/* ALL NAVBAR CATEGORIES */}
+        {/* FILTER SECTIONS */}
         <Section title="Decor">
           <CheckRow label="Table Decor" />
           <CheckRow label="Aroma Diffusers" />
@@ -270,14 +220,14 @@ export default function SidebarFilter({ isOpen, onClose }) {
             />
 
             <span
-              className={`h-5 w-5 border flex items-center justify-center rounded transition-all duration-300 ${
+              className={`h-5 w-5 border flex items-center justify-center rounded transition-all ${
                 inStock
                   ? "border-blue-600 bg-blue-50 scale-110"
                   : "border-gray-400"
               }`}
             >
               {inStock && (
-                <CheckIcon className="h-4 w-4 text-blue-700 transition-all duration-300" />
+                <CheckIcon className="h-4 w-4 text-blue-700" />
               )}
             </span>
 

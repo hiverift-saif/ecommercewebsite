@@ -2,6 +2,6 @@
 
 
 const BASE = {
-    BASE_URL: "https://designerthekitchen.com/api/v1"    
+    BASE_URL: "http://68.178.170.69:4000/api/v1"    
 }
-export default BASE;  
+export default BASE;
